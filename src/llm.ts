@@ -1,4 +1,4 @@
-// Call MiMo V2.5 (OpenAI-compatible HTTP).
+// Call DeepSeek V4 Flash (OpenAI-compatible HTTP). Needs DEEPSEEK_API_KEY in .env.
 
 export type CompleteChatOptions = {
   system: string;
@@ -6,19 +6,19 @@ export type CompleteChatOptions = {
   temperature?: number;
 };
 
-/** Ask MiMo and return the assistant text. Needs MIMO_API_KEY in .env. */
+/** Ask DeepSeek and return the assistant text. */
 export async function completeChat(
   options: CompleteChatOptions,
 ): Promise<string> {
-  const apiKey = process.env.MIMO_API_KEY;
+  const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
-    throw new Error("MIMO_API_KEY is missing (set it in .env)");
+    throw new Error("DEEPSEEK_API_KEY is missing (set it in .env)");
   }
 
   const baseUrl =
-    process.env.MIMO_BASE_URL?.replace(/\/$/, "") ||
-    "https://api.xiaomimimo.com/v1";
-  const model = process.env.MIMO_MODEL || "mimo-v2.5-pro";
+    process.env.DEEPSEEK_BASE_URL?.replace(/\/$/, "") ||
+    "https://api.deepseek.com";
+  const model = process.env.DEEPSEEK_MODEL || "deepseek-v4-flash";
 
   const res = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
@@ -38,7 +38,7 @@ export async function completeChat(
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`MiMo API error ${res.status}: ${body.slice(0, 500)}`);
+    throw new Error(`DeepSeek API error ${res.status}: ${body.slice(0, 500)}`);
   }
 
   const data = (await res.json()) as {
@@ -47,7 +47,7 @@ export async function completeChat(
 
   const text = data.choices?.[0]?.message?.content;
   if (typeof text !== "string" || text.trim() === "") {
-    throw new Error("MiMo API returned empty content");
+    throw new Error("DeepSeek API returned empty content");
   }
   return text;
 }

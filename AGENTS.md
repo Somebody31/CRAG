@@ -13,7 +13,7 @@ A Corrective RAG system: **retrieve → grade relevance → correct (rewrite + r
 
 ### Phase 1 is “done” when
 
-1. End-to-end path works on a few **manual** queries (real LanceDB + local embeddings + MiMo), and  
+1. End-to-end path works on a few **manual** queries (real LanceDB + local embeddings + DeepSeek), and  
 2. Pure helpers are **unit tested** (`decideStrength`, `routeAfterGrade`, empty-query guard) without live services.
 
 Do **not** block Phase 1 on a full gold-label eval harness or on finishing the incomplete LLM corpus generator.
@@ -37,7 +37,7 @@ Forbidden until Phase 1 is complete **and** evaluated, and you are explicitly to
 | Runtime | **Bun** |
 | Web framework | **Hono** |
 | Orchestration | **LangGraph.js** |
-| LLM | **MiMo V2.5** (chat/completions via OpenAI-compatible HTTP / `fetch`) |
+| LLM | **DeepSeek V4 Flash** (chat/completions via OpenAI-compatible HTTP / `fetch`) |
 | Embeddings | **Qwen3-Embedding-0.6B** via a **local HTTP embed server**; Bun calls it with `fetch` |
 | Vector store | **LanceDB** (dense vectors only in Phase 1) |
 | Cache/queue | **Upstash Redis** — listed only; **not used in Phase 1** |
@@ -46,7 +46,7 @@ Forbidden until Phase 1 is complete **and** evaluated, and you are explicitly to
 
 Do not introduce a different framework, ORM, vector DB, embedding model family, or LLM provider without explicit sign-off, even if it seems like a strict improvement.
 
-Prefer **`fetch`** over a heavy SDK wrapper when a plain HTTP call works (MiMo, embed server).
+Prefer **`fetch`** over a heavy SDK wrapper when a plain HTTP call works (DeepSeek, embed server).
 
 ---
 
@@ -75,7 +75,7 @@ data/crag_corpus.jsonl
 src/
   index.ts                # Hono entry + POST /api/query
   pipeline.ts             # whole CRAG run (LangGraph) — start here
-  llm.ts                  # MiMo completeChat
+  llm.ts                  # DeepSeek completeChat
   embed.ts                # local embed HTTP client
   retrieve.ts             # LanceDB top-k
   decide.ts               # grades → strong | weak
@@ -204,7 +204,7 @@ Static file serving can stay simple (Bun/Hono static or separate `python -m http
 - Retrieval talks to LanceDB only inside `retrieve.ts`. LLM HTTP only inside `llm.ts`.
 - No speculative generality. Build what Phase 1 needs.
 
-### LLM usage (MiMo V2.5)
+### LLM usage (DeepSeek V4 Flash)
 
 Typical calls in Phase 1:
 
@@ -231,7 +231,7 @@ Use structured output or strict JSON parsing with a small repair/retry — keep 
 ### Required for Phase 1
 
 - Unit tests for pure helpers (`decideStrength`, `routeAfterGrade`, `docsForAnswer`).
-- A handful of **manual** E2E queries against real services (embed server + LanceDB + MiMo).
+- A handful of **manual** E2E queries against real services (embed server + LanceDB + DeepSeek).
 
 ### After Phase 1 baseline works
 
@@ -282,7 +282,7 @@ These are deliberately **not** locked; confirm with Sathwik on first implement:
 
 1. **Exact local embed server recipe** (TEI vs sentence-transformers vs other) and port/URL env vars.  
 2. **Refusal copy** and whether refused requests use HTTP 200 + `status: "refused"` (recommended) vs a non-2xx.  
-3. **MiMo base URL / model id env names** (mirror existing `.env` style where sensible; do not invent a second secrets pattern).  
+3. **DeepSeek env names** — default `DEEPSEEK_API_KEY`, model `deepseek-v4-flash` (optional `DEEPSEEK_BASE_URL` / `DEEPSEEK_MODEL`).  
 4. **Whether generate may use only `relevant` docs** vs `relevant` + `ambiguous` (recommend: **relevant + ambiguous**, never `irrelevant`).  
 5. **GitHub remote / repo init** when first committing the TS stack.
 

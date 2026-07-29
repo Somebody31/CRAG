@@ -2,7 +2,7 @@
 
 Retrieve → grade → correct (rewrite + re-retrieve) → generate **or refuse**.
 
-Stack (locked): **Bun · Hono · LangGraph.js · MiMo V2.5 · LanceDB · Qwen3-Embedding-0.6B**.
+Stack (locked): **Bun · Hono · LangGraph.js · DeepSeek V4 Flash · LanceDB · Qwen3-Embedding-0.6B**.
 
 See [`AGENTS.md`](./AGENTS.md) for rules agents must follow.
 
@@ -20,7 +20,7 @@ embed-server/.venv/bin/pip install -r embed-server/requirements.txt
 
 ### 2. Environment
 
-Copy `.env.example` → `.env` and set `MIMO_API_KEY`.
+Copy `.env.example` → `.env` and set `DEEPSEEK_API_KEY`.
 
 ### 3. Embedding server
 
@@ -74,7 +74,7 @@ Weak evidence after max **2** correction attempts → **`refused`** (no degraded
 src/
   index.ts       Hono entry + /api/query
   pipeline.ts    whole CRAG run (start here)
-  llm.ts         MiMo chat
+  llm.ts         DeepSeek chat
   embed.ts       local Qwen3 HTTP client
   retrieve.ts    LanceDB top-k=6
   decide.ts      grades → strong|weak
@@ -97,7 +97,7 @@ node tests/crag-ui.test.mjs                            # UI static + smoke (mock
 ## Pipeline (Phase 1)
 
 1. **Retrieve** — dense ANN, k=6  
-2. **Grade** — each doc `relevant` | `ambiguous` | `irrelevant` (MiMo)  
+2. **Grade** — each doc `relevant` | `ambiguous` | `irrelevant` (DeepSeek)  
 3. **Decide** — strong if `(relevant≥1 ∧ irrelevant=0) ∨ relevant≥2`  
 4. **Correct** — rewrite → re-retrieve LanceDB only (no web)  
 5. **Generate** or **Refuse** after at most 2 corrections  
