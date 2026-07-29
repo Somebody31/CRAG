@@ -58,7 +58,7 @@ Prefer **`fetch`** over a heavy SDK wrapper when a plain HTTP call works (DeepSe
 | `data/crag_corpus.jsonl` | Source corpus for ingest (one row per doc). |
 | `data/crag_queries.jsonl` | Optional later eval; not required for Phase 1 done. |
 | `data/lancedb/` | Rebuilt by **TS ingest** with a real vector column. |
-| `scripts/*.py` | Legacy data tooling. **Archive** (move aside / keep in git history) once TS ingest works — **do not hard-delete** without asking. Incomplete MiMo corpus generator stays available only via archive/history until gold labels are revisited. |
+| `scripts/*.py` | Legacy data tooling (DeepSeek corpus generator). **Archive** once TS ingest works — **do not hard-delete** without asking. |
 
 ---
 

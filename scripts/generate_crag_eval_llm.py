@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Production-grade CRAG eval corpus + queries via Xiaomi MiMo (mimo-v2.5-pro).
+Production-grade CRAG eval corpus + queries via DeepSeek V4 Flash.
 
 Hardening vs v1:
   - Never destroy live corpus until a new build is complete (staging dir)
@@ -128,8 +128,8 @@ DEFAULT_ACTION = {
     "multi_cluster": ("rewrite", True),
 }
 
-API_TIMEOUT_S = float(os.getenv("MIMO_TIMEOUT", "300"))
-MAX_RETRIES = int(os.getenv("MIMO_RETRIES", "4"))
+API_TIMEOUT_S = float(os.getenv("DEEPSEEK_TIMEOUT", "300"))
+MAX_RETRIES = int(os.getenv("DEEPSEEK_RETRIES", "4"))
 CLUSTER_ATTEMPTS = int(os.getenv("CLUSTER_ATTEMPTS", "4"))
 
 
@@ -256,28 +256,28 @@ STATS = ApiStats()
 
 def load_env() -> None:
     load_dotenv(ROOT / ".env")
-    if not os.getenv("MIMO_API_KEY"):
-        raise SystemExit("MIMO_API_KEY missing. Put it in .env (see .env.example).")
+    if not os.getenv("DEEPSEEK_API_KEY"):
+        raise SystemExit("DEEPSEEK_API_KEY missing. Put it in .env (see .env.example).")
 
 
 def client() -> OpenAI:
     load_env()
     return OpenAI(
-        api_key=os.environ["MIMO_API_KEY"],
-        base_url=os.getenv("MIMO_BASE_URL", "https://api.xiaomimimo.com/v1"),
+        api_key=os.environ["DEEPSEEK_API_KEY"],
+        base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
         timeout=API_TIMEOUT_S,
         max_retries=0,  # we handle retries ourselves
     )
 
 
 def model_name() -> str:
-    return os.getenv("MIMO_MODEL", "mimo-v2.5-pro")
+    return os.getenv("DEEPSEEK_MODEL", "deepseek-v4-flash")
 
 
 def system_prompt() -> str:
     today = date.today().strftime("%A, %B %d, %Y")
     return (
-        f"You are MiMo, an AI assistant developed by Xiaomi. Today's date: {today}. "
+        f"You are a careful data-generation assistant. Today's date: {today}. "
         "You generate production-quality synthetic enterprise knowledge-base documents "
         "and evaluation queries for Corrective RAG research. "
         "Follow instructions exactly. Output only the requested format with no surrounding prose."
@@ -1428,7 +1428,7 @@ def run_smoke(cl: OpenAI) -> None:
     log(f"Smoke test model={model_name()} timeout={API_TIMEOUT_S}s")
     text = chat(
         cl,
-        'Return exactly this JSON object and nothing else: {"ok": true, "model": "mimo-v2.5-pro"}',
+        'Return exactly this JSON object and nothing else: {"ok": true, "model": "deepseek-v4-flash"}',
         max_tokens=128,
         temperature=0,
         label="smoke",
@@ -1437,13 +1437,13 @@ def run_smoke(cl: OpenAI) -> None:
     rows = parse_jsonl_blob(text)
     if not rows or not rows[0].get("ok"):
         # accept any non-empty as connectivity OK
-        if "ok" not in text.lower() and "mimo" not in text.lower():
+        if "ok" not in text.lower() and "deepseek" not in text.lower():
             raise SystemExit("Smoke parse unexpected")
     log(f"Smoke OK | {STATS.summary_line()}")
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Production CRAG eval generation via MiMo")
+    ap = argparse.ArgumentParser(description="Production CRAG eval generation via DeepSeek")
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--corpus-only", action="store_true")
     ap.add_argument("--queries-only", action="store_true")
@@ -1462,7 +1462,7 @@ def main() -> None:
 
     cl = client()
     STATS.t0 = time.time()  # reset wall clock for this process
-    log(f"Model: {model_name()}  Base: {os.getenv('MIMO_BASE_URL', 'https://api.xiaomimimo.com/v1')}")
+    log(f"Model: {model_name()}  Base: {os.getenv('DEEPSEEK_BASE_URL', 'https://api.deepseek.com')}")
     log(f"Timeout: {API_TIMEOUT_S}s  Retries: {MAX_RETRIES}  Cluster attempts: {CLUSTER_ATTEMPTS}")
     log("Detailed metrics: completion-tok/s, total-tok/s, content-chars/s, cumulative tokens, ETA")
 
