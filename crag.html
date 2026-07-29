@@ -1,0 +1,3029 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark" />
+  <title>CRAG</title>
+  <style>
+/* ─── Dark Apple — Vision Pro / Music materials ─────────────────── */
+:root {
+  --bg: #000000;
+  --bg-elev: #0c0c0e;
+  --surface: rgba(255, 255, 255, 0.045);
+  --surface-2: rgba(255, 255, 255, 0.07);
+  --surface-3: rgba(255, 255, 255, 0.1);
+  --surface-solid: #141416;
+  --surface-solid-2: #1c1c1f;
+
+  --fg: #f5f5f7;
+  --fg-2: rgba(235, 235, 245, 0.72);
+  --muted: rgba(235, 235, 245, 0.48);
+  --meta: rgba(235, 235, 245, 0.32);
+
+  --hairline: rgba(255, 255, 255, 0.08);
+  --hairline-strong: rgba(255, 255, 255, 0.14);
+  --hairline-soft: rgba(255, 255, 255, 0.05);
+
+  /* Single luminous accent — system blue */
+  --accent: #0a84ff;
+  --accent-soft: rgba(10, 132, 255, 0.18);
+  --accent-glow: rgba(10, 132, 255, 0.35);
+  --accent-on: #ffffff;
+
+  /* Correction branch — warm signal, not neon */
+  --branch: #ff9f0a;
+  --branch-soft: rgba(255, 159, 10, 0.16);
+  --branch-fg: #ffb340;
+
+  --success: #30d158;
+  --success-soft: rgba(48, 209, 88, 0.14);
+  --danger: #ff453a;
+  --danger-soft: rgba(255, 69, 58, 0.16);
+  --warn: #ffd60a;
+  --warn-soft: rgba(255, 214, 10, 0.14);
+
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Segoe UI", system-ui, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 17px;
+  --text-lg: 22px;
+  --text-xl: 28px;
+  --text-2xl: 34px;
+  --text-3xl: 40px;
+
+  --leading-tight: 1.15;
+  --leading-body: 1.55;
+  --tracking-tight: -0.022em;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-pill: 9999px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.55);
+  --shadow-focus: 0 0 0 3px rgba(10, 132, 255, 0.45);
+  --shadow-input: 0 0 0 1px var(--hairline), 0 8px 32px rgba(0, 0, 0, 0.35);
+
+  --motion-fast: 140ms;
+  --motion-base: 240ms;
+  --motion-panel: 420ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-panel: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  --compose-max: 640px;
+  --content-max: 720px;
+  --topbar-h: 52px;
+  --z-backdrop: 40;
+  --z-drawer: 50;
+  --z-modal: 60;
+  --z-toast: 80;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+  background: var(--bg);
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+img, svg { display: block; max-width: 100%; }
+button {
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+}
+p { margin: 0; text-wrap: pretty; }
+h1, h2, h3 { margin: 0; text-wrap: balance; font-weight: 600; letter-spacing: var(--tracking-tight); }
+:focus { outline: none; }
+:focus-visible { box-shadow: var(--shadow-focus); border-radius: var(--radius-sm); }
+::selection { background: rgba(10, 132, 255, 0.35); color: var(--fg); }
+
+/* ─── App shell ─────────────────────────────────────────────────── */
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(10, 132, 255, 0.08), transparent 55%),
+    radial-gradient(800px 400px at 80% 100%, rgba(255, 159, 10, 0.03), transparent 50%),
+    var(--bg);
+}
+
+.topbar {
+  flex: 0 0 auto;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-5);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--motion-base) var(--ease-standard),
+    background var(--motion-base) var(--ease-standard);
+  position: relative;
+  z-index: 10;
+}
+.topbar.has-border {
+  border-bottom-color: var(--hairline);
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #1a1a1e 0%, #0a0a0c 100%);
+  border: 1px solid var(--hairline-strong);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--fg);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.brand-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.brand-sub {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-left: 2px;
+}
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.main {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  scroll-behavior: smooth;
+}
+
+.main-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-5) var(--space-16);
+}
+
+/* ─── Buttons ───────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard),
+    opacity var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: var(--text-xs);
+  min-height: 32px;
+}
+.btn-md {
+  height: 36px;
+  padding: 0 16px;
+  font-size: var(--text-sm);
+  min-height: 36px;
+}
+.btn-lg {
+  height: 44px;
+  padding: 0 20px;
+  font-size: var(--text-base);
+  min-height: 44px;
+}
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-pill);
+}
+.btn-icon.btn-sm { width: 32px; height: 32px; }
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-on);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 4px 12px rgba(10, 132, 255, 0.25);
+}
+.btn-primary:hover:not(:disabled) {
+  background: #2990ff;
+}
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--fg);
+  border: 1px solid var(--hairline);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--surface-3);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--fg-2);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--fg);
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger-soft {
+  background: var(--danger-soft);
+  color: #ff6961;
+  border: 1px solid rgba(255, 69, 58, 0.25);
+}
+.btn-danger-soft:hover:not(:disabled) {
+  background: rgba(255, 69, 58, 0.24);
+}
+.btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* ─── Landing / compose ─────────────────────────────────────────── */
+.landing {
+  min-height: calc(100vh - var(--topbar-h) - 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+}
+.landing-kicker {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-3);
+}
+.landing h1 {
+  font-size: clamp(32px, 6vw, var(--text-3xl));
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-3);
+  max-width: 14ch;
+}
+.landing-lead {
+  color: var(--fg-2);
+  font-size: var(--text-md);
+  max-width: 36ch;
+  margin: 0 auto var(--space-8);
+  line-height: 1.45;
+}
+
+.compose-card {
+  width: 100%;
+  max-width: var(--compose-max);
+  background: var(--surface-solid);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-input);
+  padding: var(--space-3);
+  transition:
+    border-color var(--motion-base) var(--ease-standard),
+    box-shadow var(--motion-base) var(--ease-standard);
+}
+.compose-card:focus-within {
+  border-color: rgba(10, 132, 255, 0.45);
+  box-shadow: var(--shadow-input), 0 0 0 4px var(--accent-soft);
+}
+.compose-card.is-invalid {
+  border-color: rgba(255, 69, 58, 0.55);
+  box-shadow: var(--shadow-input), 0 0 0 4px var(--danger-soft);
+  animation: shake 380ms var(--ease-out);
+}
+.compose-card.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(3px); }
+}
+
+.compose-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+.compose-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  resize: none;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--text-md);
+  line-height: 1.4;
+  padding: 10px 12px;
+  max-height: 160px;
+  min-height: 44px;
+  field-sizing: content;
+}
+.compose-input::placeholder { color: var(--meta); }
+.compose-input:disabled { opacity: 0.6; }
+
+.compose-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 4px 8px 2px;
+  min-height: 28px;
+}
+.backend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.backend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 3px var(--success-soft);
+}
+.backend-pill.is-offline .backend-dot {
+  background: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-soft);
+}
+.backend-pill.is-checking .backend-dot {
+  background: var(--muted);
+  box-shadow: none;
+  animation: pulse-dot 1s ease infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.inline-error {
+  margin-top: var(--space-3);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  border: 1px solid rgba(255, 69, 58, 0.22);
+  color: #ff8a84;
+  font-size: var(--text-sm);
+  text-align: left;
+  max-width: var(--compose-max);
+  width: 100%;
+}
+
+.examples {
+  margin-top: var(--space-8);
+  width: 100%;
+  max-width: var(--compose-max);
+}
+.examples-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--meta);
+  margin-bottom: var(--space-3);
+}
+.example-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  color: var(--fg-2);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
+}
+.chip:hover {
+  background: var(--surface-2);
+  color: var(--fg);
+}
+
+/* Follow-up compose (bottom sticky feel inside flow) */
+.followup {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--hairline-soft);
+}
+.followup-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+.context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-2);
+}
+.context-chip strong { color: var(--fg); font-weight: 600; }
+.context-chip button {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 2px;
+}
+.context-chip button:hover { text-decoration: underline; }
+
+/* ─── History ───────────────────────────────────────────────────── */
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+.history-item {
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color var(--motion-base) var(--ease-standard);
+}
+.history-item:hover { border-color: var(--hairline-strong); }
+.history-head {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+}
+.history-head:hover { background: var(--surface); }
+.history-q {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--fg);
+  line-height: 1.4;
+}
+.history-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.history-body {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--hairline-soft);
+}
+.history-item.is-open .history-body { display: block; padding-top: 14px; }
+.history-chevron {
+  color: var(--muted);
+  transition: transform var(--motion-base) var(--ease-panel);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.history-item.is-open .history-chevron { transform: rotate(180deg); }
+
+/* ─── Badges ────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.badge-muted {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.badge-ok {
+  background: var(--success-soft);
+  color: #5ce07a;
+}
+.badge-warn {
+  background: var(--warn-soft);
+  color: #ffe04a;
+}
+.badge-danger {
+  background: var(--danger-soft);
+  color: #ff6961;
+}
+.badge-branch {
+  background: var(--branch-soft);
+  color: var(--branch-fg);
+}
+.badge-accent {
+  background: var(--accent-soft);
+  color: #64b5ff;
+}
+.badge-attempt {
+  background: var(--branch-soft);
+  color: var(--branch-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Active turn ───────────────────────────────────────────────── */
+.turn {
+  animation: fade-up 360ms var(--ease-out);
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.turn-query {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.25;
+  margin-bottom: var(--space-5);
+}
+.turn-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* ─── Stepper ───────────────────────────────────────────────────── */
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--space-6);
+  position: relative;
+}
+.step {
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  overflow: hidden;
+  transition:
+    background var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard);
+}
+.step.is-active {
+  background: var(--surface);
+  border-color: var(--hairline);
+}
+.step.is-branch.is-active,
+.step.is-branch.is-done {
+  /* warm branch identity */
+}
+.step.is-failed {
+  background: var(--danger-soft);
+  border-color: rgba(255, 69, 58, 0.2);
+}
+.step-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  text-align: left;
+  cursor: default;
+}
+.step.is-done .step-head,
+.step.is-failed .step-head {
+  cursor: pointer;
+}
+.step.is-done .step-head:hover,
+.step.is-failed .step-head:hover {
+  background: var(--surface);
+}
+.step-marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--hairline-strong);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  position: relative;
+}
+.step.is-active .step-marker {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.08);
+}
+.step.is-active .step-marker::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(10, 132, 255, 0.25);
+  animation: ring-pulse 1.6s var(--ease-standard) infinite;
+}
+.step.is-branch.is-active .step-marker {
+  border-color: var(--branch);
+  background: var(--branch-soft);
+  color: var(--branch-fg);
+  box-shadow: 0 0 0 4px rgba(255, 159, 10, 0.08);
+}
+.step.is-branch.is-active .step-marker::after {
+  border-color: rgba(255, 159, 10, 0.3);
+}
+.step.is-done .step-marker {
+  border-color: transparent;
+  background: var(--success-soft);
+  color: var(--success);
+}
+.step.is-branch.is-done .step-marker {
+  background: var(--branch-soft);
+  color: var(--branch-fg);
+}
+.step.is-failed .step-marker {
+  border-color: transparent;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.step.is-skipped .step-marker {
+  opacity: 0.35;
+}
+@keyframes ring-pulse {
+  0% { opacity: 0.8; transform: scale(0.92); }
+  70% { opacity: 0; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(1.15); }
+}
+.step-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--fg-2);
+}
+.step.is-active .step-label { color: var(--fg); font-weight: 600; }
+.step.is-done .step-label { color: var(--fg-2); }
+.step.is-skipped .step-label { color: var(--meta); }
+.step-summary {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 2px;
+}
+.step-aside {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.step-body {
+  display: none;
+  padding: 0 14px 14px 48px;
+  font-size: var(--text-sm);
+  color: var(--fg-2);
+}
+.step.is-expanded .step-body { display: block; }
+.step-detail-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.step-detail-list li {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--hairline-soft);
+}
+.step-detail-list strong {
+  display: block;
+  color: var(--fg);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  margin-bottom: 2px;
+}
+.step-detail-list span {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+.grade-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.grade-track {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.grade-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.grade-fill.is-low { background: var(--branch); }
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-2);
+}
+
+.cancelled-banner,
+.empty-banner,
+.error-banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  margin-bottom: var(--space-5);
+}
+.cancelled-banner {
+  border-color: var(--hairline-strong);
+}
+.empty-banner {
+  border-color: rgba(255, 159, 10, 0.25);
+  background: var(--branch-soft);
+}
+.error-banner {
+  border-color: rgba(255, 69, 58, 0.25);
+  background: var(--danger-soft);
+}
+.banner-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--fg);
+}
+.banner-body {
+  font-size: var(--text-sm);
+  color: var(--fg-2);
+  line-height: 1.45;
+}
+.banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: 4px;
+}
+
+/* ─── Answer ────────────────────────────────────────────────────── */
+.answer-block {
+  margin-bottom: var(--space-6);
+}
+.degraded-flag {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--warn-soft);
+  border: 1px solid rgba(255, 214, 10, 0.28);
+  margin-bottom: var(--space-4);
+}
+.degraded-flag svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--warn);
+}
+.degraded-flag strong {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: #ffe04a;
+  margin-bottom: 2px;
+}
+.degraded-flag p {
+  font-size: var(--text-xs);
+  color: rgba(255, 224, 74, 0.85);
+  line-height: 1.45;
+}
+
+.answer-card {
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--surface-solid);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-sm);
+}
+.answer-text {
+  font-size: var(--text-md);
+  line-height: 1.6;
+  color: var(--fg);
+  max-width: 62ch;
+}
+.answer-text p + p { margin-top: 0.85em; }
+.answer-text strong { font-weight: 600; }
+
+.answer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--hairline-soft);
+}
+.feedback-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+}
+.feedback-group .btn {
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+}
+.feedback-group .btn:hover:not(:disabled) {
+  color: var(--fg);
+  background: var(--surface-2);
+}
+.feedback-group .btn.is-selected {
+  color: var(--fg);
+  background: var(--surface-3);
+}
+.feedback-group .btn.is-selected[data-fb="up"] { color: var(--success); }
+.feedback-group .btn.is-selected[data-fb="down"] { color: var(--danger); }
+.feedback-recorded {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 6px;
+}
+
+.correction-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: var(--space-4);
+}
+.correction-panel {
+  display: none;
+  margin-bottom: var(--space-4);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--branch-soft);
+  border: 1px solid rgba(255, 159, 10, 0.22);
+  animation: fade-up 280ms var(--ease-out);
+}
+.correction-panel.is-open { display: block; }
+.correction-panel h3 {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--branch-fg);
+  margin-bottom: 10px;
+}
+.correction-grid {
+  display: grid;
+  gap: 10px;
+}
+.correction-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  font-size: var(--text-xs);
+}
+.correction-row dt {
+  color: var(--muted);
+  font-weight: 500;
+}
+.correction-row dd {
+  margin: 0;
+  color: var(--fg-2);
+  line-height: 1.4;
+}
+
+/* ─── Sources ───────────────────────────────────────────────────── */
+.sources {
+  margin-bottom: var(--space-4);
+}
+.sources-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--meta);
+  margin-bottom: var(--space-3);
+}
+.sources-row {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+.source-card {
+  flex: 0 0 220px;
+  scroll-snap-align: start;
+  text-align: left;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  cursor: pointer;
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.source-card:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+}
+.source-card:active { transform: scale(0.985); }
+.source-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.source-idx {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fg-2);
+  flex-shrink: 0;
+}
+.source-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--fg);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.source-snippet {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: auto;
+}
+
+/* ─── Drawer ────────────────────────────────────────────────────── */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-panel) var(--ease-panel);
+  z-index: var(--z-backdrop);
+}
+.drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 100vw);
+  background: rgba(18, 18, 20, 0.92);
+  backdrop-filter: saturate(180%) blur(28px);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  border-left: 1px solid var(--hairline);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(100%);
+  transition: transform var(--motion-panel) var(--ease-panel);
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+}
+.drawer.open { transform: translateX(0); }
+.drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--hairline);
+}
+.drawer-head h2 {
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.3;
+  padding-right: var(--space-2);
+}
+.drawer-sub {
+  margin-top: 6px;
+  font-size: var(--text-xs);
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.drawer-body {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: var(--space-5);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--fg-2);
+}
+.drawer-body p + p { margin-top: 1em; }
+
+/* ─── Modal ─────────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-base) var(--ease-standard);
+  z-index: var(--z-modal);
+}
+.modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal {
+  width: min(400px, 100%);
+  background: var(--surface-solid-2);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-lg);
+  transform: scale(0.96) translateY(8px);
+  transition: transform var(--motion-base) var(--ease-panel);
+}
+.modal-backdrop.open .modal {
+  transform: scale(1) translateY(0);
+}
+.modal h3 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
+}
+.modal p {
+  font-size: var(--text-sm);
+  color: var(--fg-2);
+  line-height: 1.45;
+  margin-bottom: var(--space-5);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* ─── Toast ─────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%) translateY(12px);
+  background: rgba(40, 40, 44, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--hairline-strong);
+  color: var(--fg);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--motion-base) var(--ease-standard),
+    transform var(--motion-base) var(--ease-panel);
+  z-index: var(--z-toast);
+  max-width: min(90vw, 360px);
+  text-align: center;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .main-inner { padding: var(--space-5) var(--space-4) var(--space-12); }
+  .landing h1 { max-width: none; }
+  .correction-row { grid-template-columns: 1fr; gap: 2px; }
+  .answer-actions { gap: 6px; }
+  .feedback-group { margin-left: 0; width: 100%; justify-content: center; }
+  .source-card { flex-basis: 180px; }
+  .drawer { width: 100vw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .step.is-active .step-marker::after { display: none; }
+  .compose-card.is-invalid { animation: none; }
+  .turn { animation: none; }
+}
+  </style>
+</head>
+<body>
+  <div class="app" id="app" data-od-id="app-shell">
+    <header class="topbar" id="topbar" data-od-id="topbar">
+      <div class="brand" data-od-id="brand">
+        <span class="brand-mark" aria-hidden="true">C</span>
+        <span class="brand-name">CRAG</span>
+        <span class="brand-sub">Corrective RAG</span>
+      </div>
+      <div class="topbar-actions" id="topbar-actions" data-od-id="topbar-actions"></div>
+    </header>
+
+    <main class="main" id="main" data-od-id="main" role="main">
+      <div class="main-inner" id="main-inner"></div>
+    </main>
+  </div>
+
+  <!-- Source drawer -->
+  <div class="drawer-backdrop" id="drawer-backdrop" aria-hidden="true"></div>
+  <aside
+    class="drawer"
+    id="drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="drawer-title"
+    aria-hidden="true"
+    data-od-id="drawer"
+  >
+    <div class="drawer-head">
+      <div>
+        <h2 id="drawer-title">Source</h2>
+        <div class="drawer-sub" id="drawer-sub"></div>
+      </div>
+      <button type="button" class="btn btn-sm btn-ghost btn-icon" id="drawer-close" aria-label="Close drawer">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </aside>
+
+  <!-- Clear conversation confirm -->
+  <div class="modal-backdrop" id="clear-modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="clear-modal-title">
+      <h3 id="clear-modal-title">Clear conversation?</h3>
+      <p>This removes every turn in the current session. You can’t undo this.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-md btn-secondary" id="clear-modal-cancel">Keep</button>
+        <button type="button" class="btn btn-md btn-danger" id="clear-modal-confirm">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" data-od-id="toast"></div>
+  <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+(function () {
+  "use strict";
+
+  /* ─── Constants ───────────────────────────────────────────────── */
+  const MAX_CORRECTION_ATTEMPTS = 2;
+  const STAGE_DELAY = { min: 480, max: 1100 };
+
+  const STAGE_META = {
+    retrieving: { label: "Retrieving documents", branch: false },
+    grading: { label: "Grading relevance", branch: false },
+    correcting: { label: "Correcting / re-querying", branch: true },
+    generating: { label: "Generating answer", branch: false }
+  };
+
+  const MOCK_CORPUS = [
+    {
+      id: "d1",
+      title: "Corrective Retrieval Augmented Generation",
+      snippet: "CRAG evaluates retrieved documents and triggers web search or re-query when relevance is low.",
+      body: "Corrective Retrieval Augmented Generation (CRAG) introduces a lightweight retrieval evaluator that assesses the overall quality of documents returned for a query. When the evaluator judges the set as incorrect or ambiguous, a corrective action rewrites the query and fetches additional evidence before generation. This reduces the chance that a language model will answer from weak or irrelevant context.",
+      score: 0.91
+    },
+    {
+      id: "d2",
+      title: "Retrieval-Augmented Generation Survey",
+      snippet: "Survey of RAG architectures covering dense retrieval, re-ranking, and faithfulness evaluation.",
+      body: "Retrieval-augmented generation combines parametric knowledge in large language models with non-parametric memory from external corpora. Dense retrievers map queries and passages into a shared embedding space. Re-rankers refine the top-k set. Faithfulness metrics check whether generated claims are supported by retrieved evidence. CRAG sits in the family of adaptive RAG systems that intervene when retrieval quality is poor.",
+      score: 0.78
+    },
+    {
+      id: "d3",
+      title: "Document Relevance Grading Heuristics",
+      snippet: "Practical heuristics for scoring passage relevance prior to answer synthesis.",
+      body: "Relevance grading can be implemented with a small LLM judge that scores each passage for topical overlap, specificity, and support for answering the user question. Aggregate scores below a threshold indicate the need for query reformulation. Partial relevance may still allow generation with an explicit confidence disclaimer.",
+      score: 0.64
+    },
+    {
+      id: "d4",
+      title: "Query Rewriting for Multi-Hop QA",
+      snippet: "Techniques for decomposing and rewriting ambiguous questions into retrieval-friendly forms.",
+      body: "Query rewriting improves recall when the original phrasing is vague or multi-hop. Effective rewrites preserve user intent while expanding entities, synonyms, and constraint language. In corrective pipelines, rewrites are only applied after an insufficient grade to avoid unnecessary latency on clean retrievals.",
+      score: 0.72
+    },
+    {
+      id: "d5",
+      title: "Grounding and Hallucination Controls",
+      snippet: "Operational patterns for flagging answers when supporting evidence is weak.",
+      body: "When evidence remains weak after correction attempts, systems should still answer if required by product policy, but surface a degraded-result flag near the answer content. Users must be able to inspect sources and correction history. Silent fallbacks undermine trust more than an explicit low-confidence notice.",
+      score: 0.55
+    },
+    {
+      id: "d6",
+      title: "Hybrid Search Operations Notes",
+      snippet: "Combining sparse BM25 with dense vectors for production retrieval stacks.",
+      body: "Hybrid retrieval blends lexical matching with semantic similarity. Fusion methods such as reciprocal rank fusion are common. Correction loops often benefit from hybrid search because rewritten queries may recover exact entity strings that pure dense retrieval missed.",
+      score: 0.69
+    }
+  ];
+
+  const EXAMPLES = [
+    { q: "How does corrective RAG improve answer faithfulness?", scenario: "clean" },
+    { q: "What is the latency tradeoff of multi-hop correction?", scenario: "correct" },
+    { q: "Summarize the degraded fallback policy for weak evidence", scenario: "degraded" },
+    { q: "no sources about fictional quantum tea protocols", scenario: "empty" },
+    { q: "force a timeout during retrieval evaluation", scenario: "timeout" }
+  ];
+
+  /* ─── State ───────────────────────────────────────────────────── */
+  const state = {
+    backend: "checking", // checking | online | offline
+    turns: [],
+    useConversationContext: true,
+    abortController: null,
+    regeneratingTurnId: null,
+    drawerSource: null,
+    clearModalOpen: false,
+    focusRestore: null
+  };
+
+  let toastTimer = null;
+  let uid = 0;
+  function nextId(prefix) {
+    uid += 1;
+    return prefix + "-" + uid;
+  }
+
+  /* ─── DOM helpers ─────────────────────────────────────────────── */
+  const $ = (sel, root) => (root || document).querySelector(sel);
+  const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+  function escapeAttr(s) {
+    return escapeHtml(s).replace(/'/g, "&#39;");
+  }
+
+  function announce(msg) {
+    const el = $("#live-region");
+    el.textContent = "";
+    requestAnimationFrame(() => {
+      el.textContent = msg;
+    });
+  }
+
+  /* ─── Overlay a11y ────────────────────────────────────────────── */
+  let focusTrapCleanup = null;
+  let bodyLockCount = 0;
+
+  function lockBodyScroll() {
+    bodyLockCount += 1;
+    if (bodyLockCount === 1) document.documentElement.style.overflow = "hidden";
+  }
+  function unlockBodyScroll() {
+    bodyLockCount = Math.max(0, bodyLockCount - 1);
+    if (bodyLockCount === 0) document.documentElement.style.overflow = "";
+  }
+  function getFocusable(root) {
+    if (!root) return [];
+    return $$(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      root
+    ).filter((el) => !el.hasAttribute("disabled") && el.getClientRects().length > 0);
+  }
+  function trapFocus(root) {
+    releaseFocusTrap();
+    const onKey = (e) => {
+      if (e.key !== "Tab") return;
+      const nodes = getFocusable(root);
+      if (!nodes.length) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    focusTrapCleanup = () => {
+      document.removeEventListener("keydown", onKey);
+      focusTrapCleanup = null;
+    };
+  }
+  function releaseFocusTrap() {
+    if (focusTrapCleanup) focusTrapCleanup();
+  }
+
+  function showToast(msg) {
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+  }
+
+  /* ─── Backend check ───────────────────────────────────────────── */
+  /** Mock pipeline when ?mock=1, offline demo, or window.__CRAG_FORCE_MOCK */
+  function useMockPipeline() {
+    const params = new URLSearchParams(location.search);
+    return (
+      params.get("mock") === "1" ||
+      params.get("offline") === "1" ||
+      window.__CRAG_FORCE_MOCK === true
+    );
+  }
+
+  function checkBackend() {
+    state.backend = "checking";
+    render();
+    const params = new URLSearchParams(location.search);
+    const forceOffline =
+      params.get("offline") === "1" || window.__CRAG_FORCE_OFFLINE === true;
+    if (forceOffline) {
+      return delay(200).then(() => {
+        state.backend = "offline";
+        render();
+        return state.backend;
+      });
+    }
+    // Demo / UI-test mock does not need a live API.
+    if (useMockPipeline()) {
+      return delay(200).then(() => {
+        state.backend = "online";
+        render();
+        return state.backend;
+      });
+    }
+    // Real backend: probe /health
+    return fetch("/health", { method: "GET" })
+      .then((res) => {
+        state.backend = res.ok ? "online" : "offline";
+        render();
+        return state.backend;
+      })
+      .catch(() => {
+        state.backend = "offline";
+        render();
+        return state.backend;
+      });
+  }
+
+  /* ─── Scenario routing ────────────────────────────────────────── */
+  function detectScenario(query) {
+    const q = query.toLowerCase();
+    if (/\b(no sources?|zero docs?|empty|fictional quantum)\b/.test(q)) return "empty";
+    if (/\b(timeout|force a timeout|stage fail)\b/.test(q)) return "timeout";
+    if (/\b(degraded|weak evidence|fallback policy)\b/.test(q)) return "degraded";
+    if (/\b(latency|multi-hop|correction|rewrite)\b/.test(q)) return "correct";
+    if (/\b(corrective|faithfulness|crag)\b/.test(q)) return "clean";
+    // Default: alternate for variety based on turn count
+    return state.turns.length % 3 === 1 ? "correct" : "clean";
+  }
+
+  /* ─── Mock pipeline primitives ────────────────────────────────── */
+  function delay(ms, signal) {
+    return new Promise((resolve, reject) => {
+      const t = setTimeout(resolve, ms);
+      if (signal) {
+        if (signal.aborted) {
+          clearTimeout(t);
+          reject(new DOMException("Aborted", "AbortError"));
+          return;
+        }
+        const onAbort = () => {
+          clearTimeout(t);
+          reject(new DOMException("Aborted", "AbortError"));
+        };
+        signal.addEventListener("abort", onAbort, { once: true });
+      }
+    });
+  }
+
+  function stageWait(signal) {
+    const ms = STAGE_DELAY.min + Math.random() * (STAGE_DELAY.max - STAGE_DELAY.min);
+    return delay(ms, signal);
+  }
+
+  function cloneDoc(d, extra) {
+    return Object.assign({}, d, extra || {});
+  }
+
+  function mockRetrieve(query, signal, opts) {
+    opts = opts || {};
+    return stageWait(signal).then(() => {
+      if (opts.scenario === "empty" && !opts.fromCorrection) return [];
+      const fromCorrection = !!opts.fromCorrection;
+      if (fromCorrection) {
+        return [
+          cloneDoc(MOCK_CORPUS[3], { fromCorrection: true, score: 0.86 }),
+          cloneDoc(MOCK_CORPUS[5], { fromCorrection: true, score: 0.81 })
+        ];
+      }
+      if (opts.scenario === "degraded") {
+        return [
+          cloneDoc(MOCK_CORPUS[4], { score: 0.42 }),
+          cloneDoc(MOCK_CORPUS[2], { score: 0.38 })
+        ];
+      }
+      if (opts.scenario === "correct" && !opts.afterCorrection) {
+        return [
+          cloneDoc(MOCK_CORPUS[2], { score: 0.41 }),
+          cloneDoc(MOCK_CORPUS[4], { score: 0.36 })
+        ];
+      }
+      // clean
+      return [
+        cloneDoc(MOCK_CORPUS[0], { score: 0.91 }),
+        cloneDoc(MOCK_CORPUS[1], { score: 0.78 }),
+        cloneDoc(MOCK_CORPUS[5], { score: 0.69 })
+      ];
+    });
+  }
+
+  function mockGrade(docs, signal, opts) {
+    opts = opts || {};
+    return stageWait(signal).then(() => {
+      if (opts.forceTimeout) {
+        const err = new Error("Stage timed out while grading relevance");
+        err.code = "TIMEOUT";
+        throw err;
+      }
+      const avg =
+        docs.reduce((s, d) => s + (d.score || 0), 0) / Math.max(docs.length, 1);
+      const grades = docs.map((d) => ({
+        id: d.id,
+        title: d.title,
+        score: d.score,
+        label: d.score >= 0.6 ? "relevant" : "low relevance"
+      }));
+      // degraded scenario: always insufficient until attempts exhausted
+      if (opts.scenario === "degraded") {
+        return { sufficient: false, avg, grades, reason: "Initial documents scored low relevance" };
+      }
+      if (opts.scenario === "correct" && !opts.allowSufficient) {
+        return { sufficient: false, avg, grades, reason: "Initial documents scored low relevance" };
+      }
+      const sufficient = avg >= 0.6 || opts.allowSufficient;
+      return {
+        sufficient,
+        avg,
+        grades,
+        reason: sufficient ? "Documents meet relevance threshold" : "Initial documents scored low relevance"
+      };
+    });
+  }
+
+  function mockRewrite(query, attempt, signal) {
+    return stageWait(signal).then(() => {
+      const base = query.replace(/\?+$/, "").trim();
+      if (attempt === 1) {
+        return base + " — expand key entities and retrieval terms";
+      }
+      return base + " — hybrid keywords + constraints for grounding";
+    });
+  }
+
+  function mockGenerate(turn, docs, signal) {
+    return stageWait(signal).then(() => {
+      const titles = docs.map((d) => d.title);
+      const ctxNote = turn.usesContext
+        ? " This answer also considers earlier turns in the conversation."
+        : "";
+      const degradeNote = turn.degraded
+        ? " Supporting evidence remained weak after correction; treat claims carefully."
+        : "";
+      const p1 =
+        "Based on the retrieved sources, <strong>" +
+        escapeHtml(turn.query.replace(/\?+$/, "")) +
+        "</strong> is best understood through a corrective retrieval loop: retrieve, grade relevance, and only rewrite when the evidence set is weak.";
+      const p2 =
+        "The strongest grounding comes from " +
+        titles
+          .slice(0, 2)
+          .map((t) => "“" + escapeHtml(t) + "”")
+          .join(" and ") +
+        ". " +
+        (turn.correctionAttempts
+          ? "A correction pass rewrote the query and pulled additional passages before synthesis."
+          : "No correction was required — the first retrieval was sufficient.") +
+        degradeNote +
+        ctxNote;
+      return "<p>" + p1 + "</p><p>" + p2 + "</p>";
+    });
+  }
+
+  function mergeDocs(existing, incoming) {
+    const map = new Map();
+    existing.forEach((d) => map.set(d.id, d));
+    incoming.forEach((d) => {
+      if (!map.has(d.id)) map.set(d.id, d);
+      else {
+        const prev = map.get(d.id);
+        map.set(d.id, Object.assign({}, prev, d, { score: Math.max(prev.score || 0, d.score || 0) }));
+      }
+    });
+    return Array.from(map.values());
+  }
+
+  /* ─── Turn factory ────────────────────────────────────────────── */
+  function createTurn(query) {
+    return {
+      id: nextId("turn"),
+      query: query,
+      status: "running", // running | answered | degraded | cancelled | error | empty-retrieval
+      scenario: detectScenario(query),
+      usesContext: state.turns.length > 0 && state.useConversationContext,
+      stages: {
+        retrieving: { state: "pending", summary: "", detail: null },
+        grading: { state: "pending", summary: "", detail: null },
+        correcting: { state: "pending", summary: "", detail: null, attempts: [] },
+        generating: { state: "pending", summary: "", detail: null }
+      },
+      activeStage: null,
+      expandedStages: {},
+      correctionAttempts: 0,
+      correctionPanelOpen: false,
+      rewrittenQueries: [],
+      docs: [],
+      sources: [],
+      answerHtml: "",
+      answerText: "",
+      degraded: false,
+      errorMessage: "",
+      feedback: null, // 'up' | 'down' | null
+      historyOpen: false,
+      createdAt: Date.now()
+    };
+  }
+
+  function setStage(turn, name, patch) {
+    turn.activeStage = name;
+    const st = turn.stages[name];
+    st.state = "active";
+    if (patch) Object.assign(st, patch);
+    // mark prior linear stages done if needed handled by caller
+    render();
+    announce(STAGE_META[name].label);
+  }
+
+  function completeStage(turn, name, summary, detail) {
+    const st = turn.stages[name];
+    st.state = "done";
+    st.summary = summary || "";
+    if (detail !== undefined) st.detail = detail;
+  }
+
+  function failStage(turn, name, message) {
+    turn.stages[name].state = "failed";
+    turn.stages[name].summary = message;
+    turn.activeStage = name;
+    turn.status = "error";
+    turn.errorMessage = message;
+  }
+
+  function isBusy() {
+    return state.turns.some((t) => t.status === "running") || !!state.regeneratingTurnId;
+  }
+
+  function activeRunningTurn() {
+    return state.turns.find((t) => t.status === "running") || null;
+  }
+
+  /* ─── Real backend pipeline (POST /api/query) ─────────────────── */
+  function escapeAnswerHtml(text) {
+    return escapeHtml(text).replace(/\n/g, "<br>");
+  }
+
+  async function runRealPipeline(turn, signal) {
+    setStage(turn, "retrieving");
+    const res = await fetch("/api/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: turn.query }),
+      signal: signal
+    });
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      failStage(turn, turn.activeStage || "retrieving", "Invalid JSON from /api/query");
+      render();
+      return;
+    }
+
+    if (!res.ok && data.status === "error") {
+      failStage(
+        turn,
+        turn.activeStage || "retrieving",
+        data.error || "Backend error " + res.status
+      );
+      render();
+      announce("Pipeline error");
+      return;
+    }
+
+    // Map documents
+    const docs = (data.documents || []).map(function (d) {
+      return {
+        id: d.id,
+        title: d.title,
+        snippet: d.snippet || "",
+        body: d.snippet || "",
+        score: d.grade === "relevant" ? 0.9 : d.grade === "ambiguous" ? 0.55 : 0.2,
+        fromCorrection: !!d.fromCorrection,
+        grade: d.grade
+      };
+    });
+    turn.docs = docs;
+    turn.sources = docs.slice();
+    turn.correctionAttempts = data.correctionAttempts || 0;
+    turn.rewrittenQueries = data.rewrites || [];
+
+    const stageNames = { retrieve: "retrieving", grade: "grading", correct: "correcting", generate: "generating", refuse: "generating" };
+    const seen = {};
+    (data.stages || []).forEach(function (s) {
+      const ui = stageNames[s.name] || null;
+      if (!ui || !turn.stages[ui]) return;
+      seen[ui] = true;
+      turn.stages[ui].state = s.ok ? "done" : "failed";
+      turn.stages[ui].summary = s.detail || s.name;
+    });
+    // Mark unused stages
+    ["retrieving", "grading", "correcting", "generating"].forEach(function (k) {
+      if (!seen[k] && turn.stages[k].state === "pending") {
+        turn.stages[k].state = "skipped";
+        turn.stages[k].summary = "Not needed";
+      }
+    });
+
+    if (data.correctionAttempts > 0 && turn.stages.correcting.state === "skipped") {
+      turn.stages.correcting.state = "done";
+      turn.stages.correcting.summary = data.correctionAttempts + " rewrite(s)";
+    }
+    if (turn.rewrittenQueries.length) {
+      turn.stages.correcting.attempts = turn.rewrittenQueries.map(function (q, i) {
+        return { attempt: i + 1, rewrittenQuery: q, newDocIds: [], newDocs: [] };
+      });
+    }
+
+    turn.activeStage = null;
+    if (data.status === "answered") {
+      turn.status = "answered";
+      turn.answerHtml = escapeAnswerHtml(data.answer || "");
+      turn.answerText = data.answer || "";
+      turn.degraded = false;
+      announce("Answer ready");
+    } else if (data.status === "refused") {
+      turn.status = "refused";
+      turn.answerHtml = "";
+      turn.answerText = data.refusal || "I don't know based on the available documents.";
+      turn.refusalMessage = turn.answerText;
+      turn.degraded = false;
+      if (turn.stages.generating.state === "pending" || turn.stages.generating.state === "skipped") {
+        turn.stages.generating.state = "done";
+        turn.stages.generating.summary = "Refused — weak evidence";
+      }
+      announce("Could not answer from knowledge base");
+    } else {
+      failStage(turn, "generating", data.error || "Unknown backend status");
+      announce("Pipeline error");
+    }
+    render();
+  }
+
+  /* ─── Pipeline ────────────────────────────────────────────────── */
+  async function runPipeline(turn, signal) {
+    try {
+      if (!useMockPipeline()) {
+        await runRealPipeline(turn, signal);
+        return;
+      }
+
+      // 1. Retrieve (mock / demo)
+      setStage(turn, "retrieving");
+      let docs = await mockRetrieve(turn.query, signal, { scenario: turn.scenario });
+      turn.docs = docs;
+
+      if (turn.scenario === "timeout") {
+        // Fail during grading after retrieve shows docs path briefly
+        completeStage(turn, "retrieving", docs.length + " documents", {
+          docs: docs.map((d) => ({ title: d.title, score: d.score, fromCorrection: !!d.fromCorrection }))
+        });
+        setStage(turn, "grading");
+        await mockGrade(docs, signal, { forceTimeout: true });
+      }
+
+      if (!docs.length) {
+        completeStage(turn, "retrieving", "No documents found", { docs: [] });
+        turn.activeStage = null;
+        turn.status = "empty-retrieval";
+        // skip remaining stages
+        ["grading", "correcting", "generating"].forEach((k) => {
+          turn.stages[k].state = "skipped";
+        });
+        render();
+        announce("No documents retrieved");
+        return;
+      }
+
+      completeStage(turn, "retrieving", docs.length + " document" + (docs.length === 1 ? "" : "s"), {
+        docs: docs.map((d) => ({ title: d.title, score: d.score, fromCorrection: !!d.fromCorrection }))
+      });
+
+      // Grade / correct loop
+      let attempt = 0;
+      let allowSufficient = turn.scenario === "clean";
+      let grade;
+      let lastInsufficientReason = "Initial documents scored low relevance";
+
+      while (true) {
+        setStage(turn, "grading");
+        grade = await mockGrade(docs, signal, {
+          scenario: turn.scenario,
+          // After any correction pass, allow sufficient grades (except degraded demos)
+          allowSufficient: turn.scenario === "degraded" ? false : allowSufficient || attempt > 0
+        });
+        // Degraded demo: force insufficient until the attempt cap
+        if (turn.scenario === "degraded") {
+          grade.sufficient = false;
+          grade.reason = "Initial documents scored low relevance";
+        }
+
+        completeStage(
+          turn,
+          "grading",
+          grade.sufficient
+            ? "Sufficient · avg " + Math.round(grade.avg * 100) + "%"
+            : "Insufficient · avg " + Math.round(grade.avg * 100) + "%",
+          { grades: grade.grades, reason: grade.reason, sufficient: grade.sufficient }
+        );
+
+        if (grade.sufficient) break;
+
+        lastInsufficientReason = grade.reason || lastInsufficientReason;
+
+        // Already used the full correction budget — generate degraded answer
+        if (attempt >= MAX_CORRECTION_ATTEMPTS) {
+          turn.degraded = true;
+          turn.correctionAttempts = attempt;
+          if (turn.stages.correcting.attempts.length) {
+            turn.stages.correcting.state = "done";
+            turn.stages.correcting.summary =
+              "Max attempts (" + MAX_CORRECTION_ATTEMPTS + ") · proceeding degraded";
+          } else {
+            turn.stages.correcting.state = "skipped";
+          }
+          break;
+        }
+
+        attempt += 1;
+        turn.correctionAttempts = attempt;
+
+        setStage(turn, "correcting", { attempt: attempt });
+        const rewritten = await mockRewrite(turn.query, attempt, signal);
+        turn.rewrittenQueries.push(rewritten);
+
+        const newDocs = await mockRetrieve(rewritten, signal, {
+          scenario: turn.scenario,
+          fromCorrection: true,
+          afterCorrection: true
+        });
+        docs = mergeDocs(docs, newDocs);
+        turn.docs = docs;
+
+        turn.stages.correcting.attempts.push({
+          attempt: attempt,
+          rewrittenQuery: rewritten,
+          newDocIds: newDocs.map((d) => d.id),
+          newDocs: newDocs.map((d) => d.title)
+        });
+        completeStage(
+          turn,
+          "correcting",
+          "Attempt " + attempt + " · +" + newDocs.length + " sources",
+          {
+            attempts: turn.stages.correcting.attempts.slice(),
+            trigger: lastInsufficientReason
+          }
+        );
+
+        // After correction, re-grade (degraded stays insufficient until cap)
+        allowSufficient = turn.scenario !== "degraded";
+      }
+
+      // Generate even if degraded
+      setStage(turn, "generating");
+      const html = await mockGenerate(turn, docs, signal);
+      turn.answerHtml = html;
+      turn.answerText = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      turn.sources = docs.slice();
+      completeStage(turn, "generating", "Answer ready", null);
+
+      // If correcting never ran, mark skipped
+      if (turn.stages.correcting.state === "pending") {
+        turn.stages.correcting.state = "skipped";
+        turn.stages.correcting.summary = "Not needed";
+      }
+
+      turn.activeStage = null;
+      turn.status = turn.degraded ? "degraded" : "answered";
+      if (turn.degraded && turn.correctionAttempts > 0) {
+        turn.correctionPanelOpen = false;
+      }
+      render();
+      announce(turn.degraded ? "Answer ready with low-confidence flag" : "Answer ready");
+    } catch (err) {
+      if (err && err.name === "AbortError") {
+        turn.status = "cancelled";
+        turn.activeStage = null;
+        Object.keys(turn.stages).forEach((k) => {
+          if (turn.stages[k].state === "active") {
+            turn.stages[k].state = "failed";
+            turn.stages[k].summary = "Cancelled";
+          } else if (turn.stages[k].state === "pending") {
+            turn.stages[k].state = "skipped";
+          }
+        });
+        render();
+        announce("Run cancelled");
+        return;
+      }
+      const msg = (err && err.message) || "Unexpected pipeline error";
+      const active = turn.activeStage || "retrieving";
+      failStage(turn, active, msg);
+      render();
+      announce("Pipeline error: " + msg);
+    } finally {
+      if (state.abortController && state.abortController.signal === signal) {
+        state.abortController = null;
+      }
+      render();
+    }
+  }
+
+  async function regenerateAnswer(turn) {
+    if (isBusy() || !turn.sources.length) return;
+    state.regeneratingTurnId = turn.id;
+    turn.stages.generating.state = "active";
+    turn.stages.generating.summary = "Regenerating…";
+    turn.activeStage = "generating";
+    render();
+    announce("Regenerating answer");
+    const controller = new AbortController();
+    state.abortController = controller;
+    try {
+      // Keep prior docs; only generation
+      const html = await mockGenerate(turn, turn.sources, controller.signal);
+      turn.answerHtml = html;
+      turn.answerText = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      completeStage(turn, "generating", "Answer ready", null);
+      turn.activeStage = null;
+      turn.status = turn.degraded ? "degraded" : "answered";
+      showToast("Answer regenerated");
+    } catch (err) {
+      if (err && err.name === "AbortError") {
+        turn.stages.generating.state = "done";
+        turn.stages.generating.summary = "Answer ready";
+        turn.activeStage = null;
+      } else {
+        failStage(turn, "generating", (err && err.message) || "Regeneration failed");
+      }
+    } finally {
+      state.regeneratingTurnId = null;
+      state.abortController = null;
+      render();
+    }
+  }
+
+  /* ─── Actions ─────────────────────────────────────────────────── */
+  function submitQuery(raw) {
+    const query = (raw || "").trim();
+    if (!query) {
+      shakeCompose();
+      return false;
+    }
+    if (state.backend === "offline") {
+      render();
+      return false;
+    }
+    if (isBusy()) return false;
+
+    // Collapse previous open history items optional — keep expanded state
+    const turn = createTurn(query);
+    state.turns.push(turn);
+    const controller = new AbortController();
+    state.abortController = controller;
+    render();
+    runPipeline(turn, controller.signal);
+    // scroll to latest
+    requestAnimationFrame(() => {
+      const el = document.getElementById("turn-" + turn.id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return true;
+  }
+
+  function cancelRun() {
+    if (state.abortController) {
+      state.abortController.abort();
+    }
+  }
+
+  function retryTurn(turn) {
+    if (isBusy()) return;
+    // Replace with fresh run of same query
+    const idx = state.turns.indexOf(turn);
+    const fresh = createTurn(turn.query);
+    // preserve context flag from original
+    fresh.usesContext = turn.usesContext;
+    if (idx >= 0) state.turns[idx] = fresh;
+    else state.turns.push(fresh);
+    const controller = new AbortController();
+    state.abortController = controller;
+    render();
+    runPipeline(fresh, controller.signal);
+  }
+
+  function clearConversation() {
+    cancelRun();
+    state.turns = [];
+    state.clearModalOpen = false;
+    closeDrawer();
+    unlockAll();
+    render();
+    showToast("Conversation cleared");
+  }
+
+  function unlockAll() {
+    releaseFocusTrap();
+    while (bodyLockCount > 0) unlockBodyScroll();
+  }
+
+  function shakeCompose() {
+    const card = $("#compose-card");
+    if (!card) return;
+    card.classList.remove("is-invalid");
+    void card.offsetWidth;
+    card.classList.add("is-invalid");
+    const input = $("#compose-input");
+    if (input) input.focus();
+    setTimeout(() => card.classList.remove("is-invalid"), 450);
+  }
+
+  /* ─── Drawer / modal ──────────────────────────────────────────── */
+  function openSourceDrawer(source) {
+    state.drawerSource = source;
+    state.focusRestore = document.activeElement;
+    const drawer = $("#drawer");
+    const backdrop = $("#drawer-backdrop");
+    $("#drawer-title").textContent = source.title;
+    const sub = $("#drawer-sub");
+    sub.innerHTML =
+      (source.fromCorrection
+        ? '<span class="badge badge-branch">From correction</span>'
+        : '<span class="badge badge-muted">Original retrieval</span>') +
+      (typeof source.score === "number"
+        ? '<span class="badge badge-accent">' + Math.round(source.score * 100) + "% relevance</span>"
+        : "");
+    $("#drawer-body").innerHTML = source.body
+      .split(/\n+/)
+      .map((p) => "<p>" + escapeHtml(p) + "</p>")
+      .join("");
+    drawer.classList.add("open");
+    backdrop.classList.add("open");
+    drawer.setAttribute("aria-hidden", "false");
+    backdrop.setAttribute("aria-hidden", "false");
+    lockBodyScroll();
+    trapFocus(drawer);
+    $("#drawer-close").focus();
+  }
+
+  function closeDrawer() {
+    if (!state.drawerSource && !$("#drawer").classList.contains("open")) return;
+    state.drawerSource = null;
+    const drawer = $("#drawer");
+    const backdrop = $("#drawer-backdrop");
+    drawer.classList.remove("open");
+    backdrop.classList.remove("open");
+    drawer.setAttribute("aria-hidden", "true");
+    backdrop.setAttribute("aria-hidden", "true");
+    releaseFocusTrap();
+    unlockBodyScroll();
+    if (state.focusRestore && state.focusRestore.focus) {
+      try { state.focusRestore.focus(); } catch (_) {}
+    }
+    state.focusRestore = null;
+  }
+
+  function openClearModal() {
+    state.clearModalOpen = true;
+    state.focusRestore = document.activeElement;
+    const modal = $("#clear-modal");
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    lockBodyScroll();
+    trapFocus(modal);
+    $("#clear-modal-cancel").focus();
+  }
+
+  function closeClearModal() {
+    state.clearModalOpen = false;
+    const modal = $("#clear-modal");
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    releaseFocusTrap();
+    unlockBodyScroll();
+    if (state.focusRestore && state.focusRestore.focus) {
+      try { state.focusRestore.focus(); } catch (_) {}
+    }
+    state.focusRestore = null;
+  }
+
+  /* ─── Render helpers ──────────────────────────────────────────── */
+  function statusBadge(status) {
+    if (status === "answered") return '<span class="badge badge-ok">Answered</span>';
+    if (status === "refused") return '<span class="badge badge-warn">Refused</span>';
+    if (status === "degraded") return '<span class="badge badge-warn">Degraded</span>';
+    if (status === "cancelled") return '<span class="badge badge-muted">Cancelled</span>';
+    if (status === "error") return '<span class="badge badge-danger">Error</span>';
+    if (status === "empty-retrieval") return '<span class="badge badge-branch">No sources</span>';
+    if (status === "running") return '<span class="badge badge-accent">Running</span>';
+    return '<span class="badge badge-muted">' + escapeHtml(status) + "</span>";
+  }
+
+  function markerIcon(stepState, isBranch) {
+    if (stepState === "done") {
+      return '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+    if (stepState === "failed") {
+      return '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    }
+    if (stepState === "active") {
+      return isBranch ? "!" : "";
+    }
+    return "";
+  }
+
+  function renderStageDetail(name, stage) {
+    if (!stage.detail) return "<p class=\"step-summary\">No detail recorded.</p>";
+    if (name === "retrieving" && stage.detail.docs) {
+      if (!stage.detail.docs.length) return "<p>No documents returned for this query.</p>";
+      return (
+        '<ul class="step-detail-list">' +
+        stage.detail.docs
+          .map((d) => {
+            return (
+              "<li><strong>" +
+              escapeHtml(d.title) +
+              (d.fromCorrection ? ' <span class="badge badge-branch">Correction</span>' : "") +
+              "</strong><span>Relevance " +
+              Math.round((d.score || 0) * 100) +
+              "%</span></li>"
+            );
+          })
+          .join("") +
+        "</ul>"
+      );
+    }
+    if (name === "grading" && stage.detail.grades) {
+      return (
+        "<p style=\"margin-bottom:10px;font-size:12px;color:var(--muted)\">" +
+        escapeHtml(stage.detail.reason || "") +
+        "</p>" +
+        '<ul class="step-detail-list">' +
+        stage.detail.grades
+          .map((g) => {
+            const pct = Math.round((g.score || 0) * 100);
+            const low = pct < 60;
+            return (
+              "<li><strong>" +
+              escapeHtml(g.title) +
+              "</strong><span>" +
+              escapeHtml(g.label) +
+              '</span><div class="grade-bar"><div class="grade-track"><div class="grade-fill' +
+              (low ? " is-low" : "") +
+              '" style="width:' +
+              pct +
+              '%"></div></div><span class="mono">' +
+              pct +
+              "%</span></div></li>"
+            );
+          })
+          .join("") +
+        "</ul>"
+      );
+    }
+    if (name === "correcting" && stage.detail.attempts) {
+      return (
+        "<p style=\"margin-bottom:10px;font-size:12px;color:var(--muted)\">Triggered because: " +
+        escapeHtml(stage.detail.trigger || "low relevance") +
+        "</p>" +
+        '<ul class="step-detail-list">' +
+        stage.detail.attempts
+          .map((a) => {
+            return (
+              "<li><strong>Attempt " +
+              a.attempt +
+              "</strong><span class=\"mono\">" +
+              escapeHtml(a.rewrittenQuery) +
+              "</span><span style=\"display:block;margin-top:4px\">New docs: " +
+              escapeHtml(a.newDocs.join(", ")) +
+              "</span></li>"
+            );
+          })
+          .join("") +
+        "</ul>"
+      );
+    }
+    return "";
+  }
+
+  function renderStepper(turn) {
+    const order = ["retrieving", "grading", "correcting", "generating"];
+    // Correction is a conditional branch — only appear once the loop engages
+    const showCorrecting =
+      turn.activeStage === "correcting" ||
+      turn.correctionAttempts > 0 ||
+      turn.stages.correcting.state === "done" ||
+      turn.stages.correcting.state === "failed" ||
+      turn.stages.correcting.state === "active";
+
+    return (
+      '<div class="stepper" data-od-id="stepper" role="list" aria-label="Pipeline progress">' +
+      order
+        .filter((name) => name !== "correcting" || showCorrecting)
+        .map((name) => {
+          const meta = STAGE_META[name];
+          const st = turn.stages[name];
+          // while running and stage still pending and not yet reached — pending
+          let visual = st.state;
+          if (turn.status === "running" && st.state === "pending") visual = "pending";
+          if (st.state === "skipped") visual = "skipped";
+
+          const isBranch = meta.branch;
+          const expanded = !!turn.expandedStages[name];
+          const canExpand = st.state === "done" || st.state === "failed";
+          const classes = [
+            "step",
+            isBranch ? "is-branch" : "",
+            visual === "active" ? "is-active" : "",
+            visual === "done" ? "is-done" : "",
+            visual === "failed" ? "is-failed" : "",
+            visual === "skipped" ? "is-skipped" : "",
+            expanded && canExpand ? "is-expanded" : ""
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          const attemptBadge =
+            name === "correcting" && (st.attempt || turn.correctionAttempts)
+              ? '<span class="badge badge-attempt">Attempt ' +
+                (st.attempt || turn.correctionAttempts) +
+                "</span>"
+              : "";
+
+          const ariaCurrent = visual === "active" ? ' aria-current="step"' : "";
+
+          return (
+            '<div class="' +
+            classes +
+            '" role="listitem" data-stage="' +
+            name +
+            '"' +
+            ariaCurrent +
+            ">" +
+            '<button type="button" class="step-head" data-action="toggle-stage" data-turn="' +
+            escapeAttr(turn.id) +
+            '" data-stage="' +
+            name +
+            '"' +
+            (canExpand ? "" : " disabled") +
+            ' aria-expanded="' +
+            (expanded && canExpand ? "true" : "false") +
+            '">' +
+            '<span class="step-marker" aria-hidden="true">' +
+            markerIcon(visual, isBranch) +
+            "</span>" +
+            '<span class="step-label">' +
+            escapeHtml(meta.label) +
+            (st.summary
+              ? '<div class="step-summary">' + escapeHtml(st.summary) + "</div>"
+              : "") +
+            "</span>" +
+            '<span class="step-aside">' +
+            attemptBadge +
+            "</span>" +
+            "</button>" +
+            (expanded && canExpand
+              ? '<div class="step-body">' + renderStageDetail(name, st) + "</div>"
+              : "") +
+            "</div>"
+          );
+        })
+        .join("") +
+      "</div>"
+    );
+  }
+
+  function renderSources(turn, idPrefix) {
+    if (!turn.sources || !turn.sources.length) return "";
+    return (
+      '<div class="sources" data-od-id="sources">' +
+      '<div class="sources-label">Sources</div>' +
+      '<div class="sources-row">' +
+      turn.sources
+        .map((s, i) => {
+          return (
+            '<button type="button" class="source-card" data-action="open-source" data-turn="' +
+            escapeAttr(turn.id) +
+            '" data-src="' +
+            escapeAttr(s.id) +
+            '" data-prefix="' +
+            escapeAttr(idPrefix || "") +
+            '">' +
+            '<div class="source-card-top">' +
+            '<span class="source-idx">' +
+            (i + 1) +
+            "</span>" +
+            (s.fromCorrection ? '<span class="badge badge-branch">Correction</span>' : "") +
+            "</div>" +
+            '<div class="source-title">' +
+            escapeHtml(s.title) +
+            "</div>" +
+            '<div class="source-snippet">' +
+            escapeHtml(s.snippet) +
+            "</div>" +
+            "</button>"
+          );
+        })
+        .join("") +
+      "</div></div>"
+    );
+  }
+
+  function renderAnswerBlock(turn, opts) {
+    opts = opts || {};
+    const compact = !!opts.compact;
+    const showActions = !compact && (turn.status === "answered" || turn.status === "degraded" || turn.status === "refused");
+
+    let html = '<div class="answer-block" data-od-id="answer">';
+
+    if (turn.correctionAttempts > 0 && (turn.status === "answered" || turn.status === "degraded")) {
+      html +=
+        '<div class="correction-toggle">' +
+        '<button type="button" class="btn btn-sm btn-secondary" data-action="toggle-correction" data-turn="' +
+        escapeAttr(turn.id) +
+        '" aria-expanded="' +
+        (turn.correctionPanelOpen ? "true" : "false") +
+        '">' +
+        '<span class="badge badge-branch">Corrected</span> ' +
+        turn.correctionAttempts +
+        " attempt" +
+        (turn.correctionAttempts === 1 ? "" : "s") +
+        " · details" +
+        "</button></div>";
+
+      html +=
+        '<div class="correction-panel' +
+        (turn.correctionPanelOpen ? " is-open" : "") +
+        '" id="corr-' +
+        escapeAttr(turn.id) +
+        '">' +
+        "<h3>Correction details</h3>" +
+        '<dl class="correction-grid">' +
+        '<div class="correction-row"><dt>Triggered by</dt><dd>' +
+        escapeHtml(
+          (turn.stages.grading.detail && turn.stages.grading.detail.reason) ||
+            "Initial documents scored low relevance"
+        ) +
+        "</dd></div>" +
+        '<div class="correction-row"><dt>Attempts</dt><dd>' +
+        turn.correctionAttempts +
+        (turn.degraded ? " (max reached)" : "") +
+        "</dd></div>" +
+        (turn.rewrittenQueries.length
+          ? '<div class="correction-row"><dt>Rewritten query</dt><dd class="mono">' +
+            escapeHtml(turn.rewrittenQueries[turn.rewrittenQueries.length - 1]) +
+            "</dd></div>"
+          : "") +
+        '<div class="correction-row"><dt>New sources</dt><dd>' +
+        escapeHtml(
+          turn.sources
+            .filter((s) => s.fromCorrection)
+            .map((s) => s.title)
+            .join(", ") || "—"
+        ) +
+        "</dd></div>" +
+        "</dl></div>";
+    }
+
+    if (turn.status === "refused") {
+      html +=
+        '<div class="degraded-flag" role="status">' +
+        '<svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5L14 13.5H2L8 2.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3.2M8 11.3h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' +
+        "<div><strong>Could not answer</strong>" +
+        "<p>" +
+        escapeHtml(
+          turn.refusalMessage ||
+            turn.answerText ||
+            "I don't know based on the available knowledge base documents."
+        ) +
+        "</p></div></div>";
+    } else if (turn.degraded && (turn.status === "degraded" || turn.status === "answered")) {
+      html +=
+        '<div class="degraded-flag" role="status">' +
+        '<svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5L14 13.5H2L8 2.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3.2M8 11.3h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' +
+        "<div><strong>Low-confidence answer</strong>" +
+        "<p>Correction attempts were exhausted and supporting documents still scored poorly. Review sources before relying on this response.</p></div></div>";
+    }
+
+    if (turn.status !== "refused") {
+    html +=
+      '<div class="answer-card"><div class="answer-text">' +
+      turn.answerHtml +
+      "</div>";
+
+    if (showActions) {
+      html +=
+        '<div class="answer-actions">' +
+        '<button type="button" class="btn btn-sm btn-secondary" data-action="copy" data-turn="' +
+        escapeAttr(turn.id) +
+        '">' +
+        '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="5.5" y="5.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 10.5v-6A1 1 0 014.5 3.5h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' +
+        "Copy</button>" +
+        '<button type="button" class="btn btn-sm btn-secondary" data-action="regenerate" data-turn="' +
+        escapeAttr(turn.id) +
+        '"' +
+        (isBusy() ? " disabled" : "") +
+        ">" +
+        '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8a5 5 0 019.5-2.2M13 8a5 5 0 01-9.5 2.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12.5 2.5v3h-3M3.5 13.5v-3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        "Regenerate</button>" +
+        '<div class="feedback-group" role="group" aria-label="Answer feedback">' +
+        '<button type="button" class="btn btn-sm btn-icon' +
+        (turn.feedback === "up" ? " is-selected" : "") +
+        '" data-action="feedback" data-fb="up" data-turn="' +
+        escapeAttr(turn.id) +
+        '"' +
+        (turn.feedback ? " disabled" : "") +
+        ' aria-label="Thumbs up" aria-pressed="' +
+        (turn.feedback === "up" ? "true" : "false") +
+        '">' +
+        '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 7.5v5.5h6.2a1.2 1.2 0 001.15-.9l1-4A1.2 1.2 0 0012.2 6.5H9l.6-2.4A1.2 1.2 0 008.1 2.7L5 7.5zM5 13H3.4A1.4 1.4 0 012 11.6V8.9A1.4 1.4 0 013.4 7.5H5" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' +
+        "</button>" +
+        '<button type="button" class="btn btn-sm btn-icon' +
+        (turn.feedback === "down" ? " is-selected" : "") +
+        '" data-action="feedback" data-fb="down" data-turn="' +
+        escapeAttr(turn.id) +
+        '"' +
+        (turn.feedback ? " disabled" : "") +
+        ' aria-label="Thumbs down" aria-pressed="' +
+        (turn.feedback === "down" ? "true" : "false") +
+        '">' +
+        '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M11 8.5V3H4.8A1.2 1.2 0 003.65 3.9l-1 4A1.2 1.2 0 003.8 9.5H7l-.6 2.4a1.2 1.2 0 001.5 1.4L11 8.5zM11 3h1.6A1.4 1.4 0 0114 4.4v2.7A1.4 1.4 0 0112.6 8.5H11" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' +
+        "</button>" +
+        (turn.feedback
+          ? '<span class="feedback-recorded">Recorded</span>'
+          : "") +
+        "</div></div>";
+    }
+
+    html += "</div>"; // answer-card
+    } // end non-refused answer card
+
+    html += renderSources(turn, opts.idPrefix || "");
+    html += "</div>";
+    return html;
+  }
+
+  function renderTurnFull(turn) {
+    let html =
+      '<article class="turn" id="turn-' +
+      escapeAttr(turn.id) +
+      '" data-turn-id="' +
+      escapeAttr(turn.id) +
+      '">';
+
+    html +=
+      '<div class="turn-toolbar">' +
+      statusBadge(turn.status) +
+      (turn.usesContext
+        ? '<span class="context-chip"><strong>Uses prior turns</strong></span>'
+        : '<span class="context-chip">Standalone query</span>') +
+      (turn.status === "running"
+        ? '<button type="button" class="btn btn-sm btn-danger-soft" data-action="cancel">' +
+          '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1.5" fill="currentColor"/></svg>' +
+          "Stop</button>"
+        : "") +
+      "</div>";
+
+    html += '<h2 class="turn-query">' + escapeHtml(turn.query) + "</h2>";
+
+    // Stepper for running / completed / error / cancelled (with partial)
+    if (
+      turn.status === "running" ||
+      turn.status === "answered" ||
+      turn.status === "refused" ||
+      turn.status === "degraded" ||
+      turn.status === "error" ||
+      turn.status === "cancelled" ||
+      turn.status === "empty-retrieval"
+    ) {
+      html += renderStepper(turn);
+    }
+
+    if (turn.status === "cancelled") {
+      html +=
+        '<div class="cancelled-banner">' +
+        '<div class="banner-title">Cancelled</div>' +
+        '<div class="banner-body">This run was stopped. No answer was generated. Partial step history is kept above.</div>' +
+        '<div class="banner-actions">' +
+        '<button type="button" class="btn btn-sm btn-secondary" data-action="retry" data-turn="' +
+        escapeAttr(turn.id) +
+        '">Retry query</button></div></div>';
+    }
+
+    if (turn.status === "empty-retrieval") {
+      html +=
+        '<div class="empty-banner">' +
+        '<div class="banner-title">No documents found</div>' +
+        '<div class="banner-body">Retrieval returned zero passages, so grading never ran. Try rephrasing the question or retry the same query.</div>' +
+        '<div class="banner-actions">' +
+        '<button type="button" class="btn btn-sm btn-primary" data-action="retry" data-turn="' +
+        escapeAttr(turn.id) +
+        '">Retry</button>' +
+        '<button type="button" class="btn btn-sm btn-secondary" data-action="focus-compose">Rephrase</button>' +
+        "</div></div>";
+    }
+
+    if (turn.status === "error") {
+      html +=
+        '<div class="error-banner">' +
+        '<div class="banner-title">Stage failed</div>' +
+        '<div class="banner-body">' +
+        escapeHtml(turn.errorMessage || "An unexpected error stopped the pipeline.") +
+        "</div>" +
+        '<div class="banner-actions">' +
+        '<button type="button" class="btn btn-sm btn-primary" data-action="retry" data-turn="' +
+        escapeAttr(turn.id) +
+        '">Retry pipeline</button></div></div>';
+    }
+
+    if (turn.status === "answered" || turn.status === "degraded") {
+      html += renderAnswerBlock(turn);
+    }
+
+    html += "</article>";
+    return html;
+  }
+
+  function renderHistoryItem(turn) {
+    const open = turn.historyOpen;
+    let body = "";
+    if (open) {
+      if (turn.status === "answered" || turn.status === "degraded") {
+        body = renderAnswerBlock(turn, { compact: true });
+      } else if (turn.status === "cancelled") {
+        body = '<p class="banner-body">Cancelled — no answer.</p>';
+      } else if (turn.status === "error") {
+        body = '<p class="banner-body">' + escapeHtml(turn.errorMessage) + "</p>";
+      } else if (turn.status === "empty-retrieval") {
+        body = '<p class="banner-body">No documents retrieved.</p>';
+      } else {
+        body = '<p class="banner-body">In progress…</p>';
+      }
+    }
+    return (
+      '<div class="history-item' +
+      (open ? " is-open" : "") +
+      '" data-od-id="history-item">' +
+      '<button type="button" class="history-head" data-action="toggle-history" data-turn="' +
+      escapeAttr(turn.id) +
+      '" aria-expanded="' +
+      (open ? "true" : "false") +
+      '">' +
+      '<span class="history-q">' +
+      escapeHtml(turn.query) +
+      "</span>" +
+      '<span class="history-meta">' +
+      statusBadge(turn.status) +
+      '<svg class="history-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      "</span></button>" +
+      '<div class="history-body">' +
+      body +
+      "</div></div>"
+    );
+  }
+
+  function renderCompose(opts) {
+    opts = opts || {};
+    const followup = !!opts.followup;
+    const offline = state.backend === "offline";
+    const busy = isBusy();
+    const disabled = offline || busy;
+
+    let backendClass = "backend-pill";
+    let backendText = "Checking connection…";
+    if (state.backend === "online") {
+      backendClass += " is-online";
+      backendText = "Backend ready";
+    } else if (state.backend === "offline") {
+      backendClass += " is-offline";
+      backendText = "Backend unreachable";
+    } else {
+      backendClass += " is-checking";
+    }
+
+    const contextControl = followup
+      ? '<div class="followup-hint">' +
+        "<span>Ask a follow-up</span>" +
+        '<span class="context-chip">' +
+        (state.useConversationContext
+          ? "<strong>Uses prior turns</strong>"
+          : "<strong>Standalone</strong>") +
+        ' · <button type="button" data-action="toggle-context">' +
+        (state.useConversationContext ? "Use standalone" : "Use context") +
+        "</button></span></div>"
+      : "";
+
+    return (
+      (followup ? '<div class="followup" data-od-id="compose">' : '<div data-od-id="compose">') +
+      contextControl +
+      '<div class="compose-card' +
+      (disabled ? " is-disabled" : "") +
+      '" id="compose-card">' +
+      '<div class="compose-row">' +
+      '<textarea class="compose-input" id="compose-input" rows="1" placeholder="' +
+      (followup ? "Ask a follow-up…" : "Ask anything about your knowledge base…") +
+      '" aria-label="' +
+      (followup ? "Follow-up question" : "Question") +
+      '"' +
+      (disabled ? " disabled" : "") +
+      "></textarea>" +
+      '<button type="button" class="btn btn-md btn-primary btn-icon" id="compose-submit" aria-label="Submit"' +
+      (disabled ? " disabled" : "") +
+      ">" +
+      '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      "</button></div>" +
+      '<div class="compose-meta"><span class="' +
+      backendClass +
+      '"><span class="backend-dot" aria-hidden="true"></span>' +
+      backendText +
+      "</span>" +
+      (busy
+        ? '<span style="font-size:11px;color:var(--muted)">Pipeline running…</span>'
+        : '<span style="font-size:11px;color:var(--meta)">Enter to send</span>') +
+      "</div></div>" +
+      (offline
+        ? '<div class="inline-error" role="alert">Can’t reach the backend. Check the service and reload — input stays disabled so nothing fails silently on submit.</div>'
+        : "") +
+      "</div>"
+    );
+  }
+
+  function renderLanding() {
+    return (
+      '<div class="landing" data-od-id="landing">' +
+      '<div class="landing-kicker">Corrective retrieval</div>' +
+      "<h1>Ask with a retrieval loop that self-corrects</h1>" +
+      '<p class="landing-lead">Documents are graded for relevance. Weak sets trigger a rewrite and re-fetch before the answer is written.</p>' +
+      renderCompose({ followup: false }) +
+      '<div class="examples">' +
+      '<div class="examples-label">Try an example</div>' +
+      '<div class="example-chips">' +
+      EXAMPLES.map((ex) => {
+        return (
+          '<button type="button" class="chip" data-action="example" data-q="' +
+          escapeAttr(ex.q) +
+          '">' +
+          escapeHtml(ex.q.length > 42 ? ex.q.slice(0, 40) + "…" : ex.q) +
+          "</button>"
+        );
+      }).join("") +
+      "</div></div></div>"
+    );
+  }
+
+  function renderConversation() {
+    const past = state.turns.slice(0, -1);
+    const latest = state.turns[state.turns.length - 1];
+    let html = "";
+
+    if (past.length) {
+      html +=
+        '<div class="history" data-od-id="history" aria-label="Earlier turns">' +
+        past.map(renderHistoryItem).join("") +
+        "</div>";
+    }
+
+    html += renderTurnFull(latest);
+
+    // Follow-up only when latest is not mid-run? Spec: persistent input once first turn completes — also available after cancel/error
+    if (latest.status !== "running") {
+      html += renderCompose({ followup: true });
+    } else {
+      // Still show disabled follow-up area? Spec: follow-up disabled until current resolves — show compose disabled
+      html += renderCompose({ followup: true });
+    }
+
+    return html;
+  }
+
+  function renderTopbar() {
+    const actions = $("#topbar-actions");
+    const topbar = $("#topbar");
+    if (!state.turns.length) {
+      actions.innerHTML = "";
+      topbar.classList.remove("has-border");
+      return;
+    }
+    topbar.classList.add("has-border");
+    const busy = isBusy();
+    actions.innerHTML =
+      (busy
+        ? '<button type="button" class="btn btn-sm btn-danger-soft" data-action="cancel">Stop</button>'
+        : "") +
+      '<button type="button" class="btn btn-sm btn-ghost" data-action="clear-open"' +
+      (busy ? " disabled" : "") +
+      ">Clear</button>";
+  }
+
+  function render() {
+    const main = $("#main-inner");
+    const scrollEl = $("#main");
+    const prevScroll = scrollEl.scrollTop;
+
+    if (!state.turns.length) {
+      main.innerHTML = renderLanding();
+    } else {
+      main.innerHTML = renderConversation();
+    }
+    renderTopbar();
+    wire();
+
+    // Preserve scroll position on re-renders during pipeline
+    if (state.turns.length) {
+      scrollEl.scrollTop = prevScroll;
+    }
+  }
+
+  /* ─── Wire events ─────────────────────────────────────────────── */
+  function autoSizeTextarea(el) {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
+  }
+
+  function findTurn(id) {
+    return state.turns.find((t) => t.id === id);
+  }
+
+  function findSource(turn, srcId) {
+    return (turn.sources || turn.docs || []).find((s) => s.id === srcId);
+  }
+
+  function wire() {
+    const input = $("#compose-input");
+    const submit = $("#compose-submit");
+    if (input) {
+      autoSizeTextarea(input);
+      input.addEventListener("input", () => autoSizeTextarea(input));
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          submitQuery(input.value);
+        }
+      });
+    }
+    if (submit) {
+      submit.addEventListener("click", () => {
+        submitQuery(input ? input.value : "");
+      });
+    }
+
+    // Event delegation on main for stability
+    // Re-bind via document level once — use onclick on main-inner
+  }
+
+  // Global click delegation (survives re-render)
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-action]");
+    if (!t) return;
+    const action = t.getAttribute("data-action");
+    const turnId = t.getAttribute("data-turn");
+    const turn = turnId ? findTurn(turnId) : null;
+
+    if (action === "example") {
+      if (isBusy() || state.backend === "offline") return;
+      const q = t.getAttribute("data-q") || "";
+      const input = $("#compose-input");
+      if (input) {
+        input.value = q;
+        autoSizeTextarea(input);
+      }
+      submitQuery(q);
+      return;
+    }
+    if (action === "cancel") {
+      cancelRun();
+      return;
+    }
+    if (action === "clear-open") {
+      openClearModal();
+      return;
+    }
+    if (action === "toggle-context") {
+      state.useConversationContext = !state.useConversationContext;
+      render();
+      return;
+    }
+    if (action === "focus-compose") {
+      const input = $("#compose-input");
+      if (input) {
+        input.disabled = false;
+        input.focus();
+      }
+      return;
+    }
+    if (action === "retry" && turn) {
+      retryTurn(turn);
+      return;
+    }
+    if (action === "toggle-stage" && turn) {
+      const stage = t.getAttribute("data-stage");
+      const st = turn.stages[stage];
+      if (st && (st.state === "done" || st.state === "failed")) {
+        turn.expandedStages[stage] = !turn.expandedStages[stage];
+        render();
+      }
+      return;
+    }
+    if (action === "toggle-history" && turn) {
+      turn.historyOpen = !turn.historyOpen;
+      render();
+      return;
+    }
+    if (action === "toggle-correction" && turn) {
+      turn.correctionPanelOpen = !turn.correctionPanelOpen;
+      render();
+      return;
+    }
+    if (action === "open-source" && turn) {
+      const src = findSource(turn, t.getAttribute("data-src"));
+      if (src) openSourceDrawer(src);
+      return;
+    }
+    if (action === "copy" && turn) {
+      const text = turn.answerText || "";
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(
+          () => showToast("Copied"),
+          () => fallbackCopy(text)
+        );
+      } else {
+        fallbackCopy(text);
+      }
+      return;
+    }
+    if (action === "regenerate" && turn) {
+      regenerateAnswer(turn);
+      return;
+    }
+    if (action === "feedback" && turn) {
+      if (turn.feedback) return;
+      turn.feedback = t.getAttribute("data-fb");
+      render();
+      showToast("Thanks for the feedback");
+      return;
+    }
+  });
+
+  function fallbackCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      showToast("Copied");
+    } catch (_) {
+      showToast("Copy failed");
+    }
+    document.body.removeChild(ta);
+  }
+
+  // Drawer close triad
+  $("#drawer-close").addEventListener("click", closeDrawer);
+  $("#drawer-backdrop").addEventListener("click", closeDrawer);
+
+  // Clear modal
+  $("#clear-modal-cancel").addEventListener("click", closeClearModal);
+  $("#clear-modal-confirm").addEventListener("click", () => {
+    clearConversation();
+  });
+  $("#clear-modal").addEventListener("click", (e) => {
+    if (e.target === $("#clear-modal")) closeClearModal();
+  });
+
+  // Escape closes topmost overlay
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (state.clearModalOpen) {
+      closeClearModal();
+      return;
+    }
+    if (state.drawerSource || $("#drawer").classList.contains("open")) {
+      closeDrawer();
+    }
+  });
+
+  // Topbar border on scroll
+  $("#main").addEventListener(
+    "scroll",
+    () => {
+      const topbar = $("#topbar");
+      if (state.turns.length) topbar.classList.add("has-border");
+      else topbar.classList.toggle("has-border", $("#main").scrollTop > 8);
+    },
+    { passive: true }
+  );
+
+  /* ─── Test surface ────────────────────────────────────────────── */
+  window.__CragUI = {
+    getState: () => state,
+    submitQuery,
+    cancelRun,
+    clearConversation,
+    checkBackend,
+    forceOffline: (v) => {
+      window.__CRAG_FORCE_OFFLINE = !!v;
+      state.backend = v ? "offline" : "online";
+      render();
+    },
+    openSourceDrawer,
+    closeDrawer,
+    MAX_CORRECTION_ATTEMPTS,
+    detectScenario,
+    render
+  };
+
+  /* ─── Boot ────────────────────────────────────────────────────── */
+  render();
+  checkBackend();
+})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+data/lancedb/
+data/staging/
+data/llm_batches/
+data/llm_gen.log
+data/llm_gen_full.log
+data/.llm_gen_state.json
+data/*.bak.*
+.env
+*.pyc
+__pycache__/
+.venv/
+embed-server/.venv/
+node_modules/
+bun.lockb
+.DS_Store
+*.log

@@ -1,0 +1,22 @@
+{
+  "name": "crag",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Corrective RAG — Phase 1 baseline (Bun + Hono + LangGraph.js)",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "test": "bun test tests/decide.test.ts tests/pipeline.test.ts",
+    "test:ui": "node tests/crag-ui.test.mjs",
+    "test:all": "bun test tests/decide.test.ts tests/pipeline.test.ts && node tests/crag-ui.test.mjs",
+    "ingest": "bun run src/ingest/load.ts",
+    "embed-server": "embed-server/.venv/bin/python embed-server/server.py"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.2.3",
+    "@langchain/langgraph": "^1.4.8",
+    "@lancedb/lancedb": "^0.22.0",
+    "hono": "^4.12.30"
+  }
+}
