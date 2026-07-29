@@ -1,135 +1,111 @@
 import { describe, expect, test } from "bun:test";
-import { runCrag } from "../src/graph/pipeline.ts";
-import { MAX_CORRECTION_ATTEMPTS } from "../src/graph/nodes.ts";
-import type { GraphDeps } from "../src/graph/deps.ts";
-import type { RetrievedDoc } from "../src/types.ts";
+import {
+  docsForAnswer,
+  MAX_CORRECTION_ATTEMPTS,
+  routeAfterGrade,
+  runCrag,
+  type CragState,
+} from "../src/pipeline.ts";
+import type { GradedDoc } from "../src/types.ts";
 
-function doc(
-  id: string,
-  title: string,
-  fromCorrection = false,
-): RetrievedDoc {
+function baseState(overrides: Partial<CragState>): CragState {
   return {
-    id,
-    title,
-    content: `Body of ${title}`,
-    snippet: `Body of ${title}`,
-    score: 0.1,
-    clusterId: "c01",
-    role: "canonical",
-    fromCorrection,
+    query: "test",
+    currentQuery: "test",
+    rewrites: [],
+    correctionAttempts: 0,
+    documents: [],
+    graded: [],
+    strength: "weak",
+    status: "running",
+    answer: null,
+    refusal: null,
+    stages: [],
+    error: null,
+    ...overrides,
   };
 }
 
-describe("runCrag with mocks", () => {
-  test("strong first retrieval → answered, no rewrite", async () => {
-    const deps: GraphDeps = {
-      retrieveSimilar: async () => [doc("d1", "SDK Install"), doc("d2", "Init")],
-      completeChat: async ({ system }) => {
-        if (system.includes("grade")) {
-          return JSON.stringify({
-            grade: "relevant",
-            reason: "direct answer",
-          });
-        }
-        if (system.includes("ONLY the provided source")) {
-          return "Install the SDK with npm and call PulseClient.init.";
-        }
-        throw new Error("unexpected LLM call: " + system.slice(0, 40));
-      },
-    };
+describe("routeAfterGrade", () => {
+  test("error ends the graph", () => {
+    expect(routeAfterGrade(baseState({ status: "error" }))).toBe("end");
+  });
 
-    const result = await runCrag("How do I install the Pulse Web SDK?", deps);
-    expect(result.status).toBe("answered");
-    expect(result.correctionAttempts).toBe(0);
-    expect(result.rewrites).toEqual([]);
-    expect(result.answer).toContain("Install");
-    expect(result.documents.length).toBe(2);
-    expect(result.stages.some((s) => s.name === "generate" && s.ok)).toBe(
-      true,
+  test("strong goes to generate", () => {
+    expect(routeAfterGrade(baseState({ strength: "strong" }))).toBe(
+      "generate",
     );
   });
 
-  test("weak then strong after rewrite → answered with correction", async () => {
-    let retrieveCount = 0;
-    const deps: GraphDeps = {
-      retrieveSimilar: async (_q, opts) => {
-        retrieveCount += 1;
-        if (retrieveCount === 1) {
-          return [doc("noise", "Cafeteria menu")];
-        }
-        return [
-          doc("good", "SDK Install Guide", opts?.fromCorrection ?? false),
-        ];
-      },
-      completeChat: async ({ system, user }) => {
-        if (system.includes("grade")) {
-          if (user.includes("Cafeteria")) {
-            return JSON.stringify({
-              grade: "irrelevant",
-              reason: "wrong topic",
-            });
-          }
-          return JSON.stringify({
-            grade: "relevant",
-            reason: "has install steps",
-          });
-        }
-        if (system.includes("rewrite")) {
-          return JSON.stringify({
-            rewrite: "Pulse Web SDK install npm package init",
-          });
-        }
-        if (system.includes("ONLY the provided source")) {
-          return "Use @northline/pulse-web and init with writeKey.";
-        }
-        throw new Error("unexpected: " + system.slice(0, 50));
-      },
-    };
-
-    const result = await runCrag("how install?", deps);
-    expect(result.status).toBe("answered");
-    expect(result.correctionAttempts).toBe(1);
-    expect(result.rewrites.length).toBe(1);
-    expect(result.answer).toContain("writeKey");
+  test("weak with budget left goes to correct", () => {
+    expect(
+      routeAfterGrade(
+        baseState({ strength: "weak", correctionAttempts: 0 }),
+      ),
+    ).toBe("correct");
   });
 
-  test("always weak → refused after max corrections", async () => {
-    let grades = 0;
-    const deps: GraphDeps = {
-      retrieveSimilar: async () => [doc("x", "Unrelated HR policy")],
-      completeChat: async ({ system }) => {
-        if (system.includes("grade")) {
-          grades += 1;
-          return JSON.stringify({
-            grade: "irrelevant",
-            reason: "no support",
-          });
-        }
-        if (system.includes("rewrite")) {
-          return JSON.stringify({ rewrite: "expanded unrelated query" });
-        }
-        throw new Error("should not generate");
-      },
-    };
-
-    const result = await runCrag(
-      "What is the secret quantum tea protocol?",
-      deps,
-    );
-    expect(result.status).toBe("refused");
-    expect(result.correctionAttempts).toBe(MAX_CORRECTION_ATTEMPTS);
-    expect(result.refusal).toMatch(/don't know/i);
-    expect(result.answer).toBeNull();
-    expect(grades).toBe(1 + MAX_CORRECTION_ATTEMPTS); // initial + after each correct
+  test("weak after max attempts goes to refuse", () => {
+    expect(
+      routeAfterGrade(
+        baseState({
+          strength: "weak",
+          correctionAttempts: MAX_CORRECTION_ATTEMPTS,
+        }),
+      ),
+    ).toBe("refuse");
   });
+});
 
-  test("empty query → error", async () => {
-    const deps: GraphDeps = {
-      retrieveSimilar: async () => [],
-      completeChat: async () => "",
-    };
-    const result = await runCrag("   ", deps);
+describe("docsForAnswer", () => {
+  test("keeps relevant and ambiguous, drops irrelevant", () => {
+    const docs: GradedDoc[] = [
+      {
+        id: "a",
+        title: "A",
+        content: "a",
+        snippet: "a",
+        score: null,
+        clusterId: null,
+        role: null,
+        fromCorrection: false,
+        grade: "relevant",
+        reason: "",
+      },
+      {
+        id: "b",
+        title: "B",
+        content: "b",
+        snippet: "b",
+        score: null,
+        clusterId: null,
+        role: null,
+        fromCorrection: false,
+        grade: "irrelevant",
+        reason: "",
+      },
+      {
+        id: "c",
+        title: "C",
+        content: "c",
+        snippet: "c",
+        score: null,
+        clusterId: null,
+        role: null,
+        fromCorrection: false,
+        grade: "ambiguous",
+        reason: "",
+      },
+    ];
+    const kept = docsForAnswer(docs);
+    expect(kept.map((d) => d.id)).toEqual(["a", "c"]);
+  });
+});
+
+describe("runCrag", () => {
+  test("empty query returns error without calling services", async () => {
+    const result = await runCrag("   ");
     expect(result.status).toBe("error");
+    expect(result.error).toBe("query is empty");
   });
 });

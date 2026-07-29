@@ -1,32 +1,12 @@
-// MiMo V2.5 chat via OpenAI-compatible HTTP. Graph code calls completeChat only.
-
-export type ChatMessage = {
-  role: "system" | "user" | "assistant";
-  content: string;
-};
+// Call MiMo V2.5 (OpenAI-compatible HTTP).
 
 export type CompleteChatOptions = {
   system: string;
   user: string;
-  /** Optional temperature (default 0.2 for grading/gen). */
   temperature?: number;
 };
 
-function mimoBaseUrl(): string {
-  return (
-    process.env.MIMO_BASE_URL?.replace(/\/$/, "") ||
-    "https://api.xiaomimimo.com/v1"
-  );
-}
-
-function mimoModel(): string {
-  return process.env.MIMO_MODEL || "mimo-v2.5-pro";
-}
-
-/**
- * Ask MiMo and return assistant text.
- * Throws if MIMO_API_KEY is missing or the HTTP call fails.
- */
+/** Ask MiMo and return the assistant text. Needs MIMO_API_KEY in .env. */
 export async function completeChat(
   options: CompleteChatOptions,
 ): Promise<string> {
@@ -35,20 +15,23 @@ export async function completeChat(
     throw new Error("MIMO_API_KEY is missing (set it in .env)");
   }
 
-  const messages: ChatMessage[] = [
-    { role: "system", content: options.system.trim() },
-    { role: "user", content: options.user },
-  ];
+  const baseUrl =
+    process.env.MIMO_BASE_URL?.replace(/\/$/, "") ||
+    "https://api.xiaomimimo.com/v1";
+  const model = process.env.MIMO_MODEL || "mimo-v2.5-pro";
 
-  const res = await fetch(`${mimoBaseUrl()}/chat/completions`, {
+  const res = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: mimoModel(),
-      messages,
+      model: model,
+      messages: [
+        { role: "system", content: options.system.trim() },
+        { role: "user", content: options.user },
+      ],
       temperature: options.temperature ?? 0.2,
     }),
   });
@@ -68,6 +51,3 @@ export async function completeChat(
   }
   return text;
 }
-
-/** Injectable chat function type for tests. */
-export type CompleteChatFn = typeof completeChat;

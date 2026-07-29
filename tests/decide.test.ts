@@ -6,11 +6,11 @@ describe("decideStrength", () => {
     expect(decideStrength([])).toBe("weak");
   });
 
-  test("one relevant zero irrelevant is strong", () => {
+  test("one relevant and no irrelevant is strong", () => {
     expect(decideStrength(["relevant", "ambiguous"])).toBe("strong");
   });
 
-  test("one relevant with irrelevant is weak unless two relevant", () => {
+  test("one relevant plus irrelevant is weak unless two relevant", () => {
     expect(decideStrength(["relevant", "irrelevant"])).toBe("weak");
     expect(decideStrength(["relevant", "relevant", "irrelevant"])).toBe(
       "strong",

@@ -10,7 +10,7 @@
     "test": "bun test tests/decide.test.ts tests/pipeline.test.ts",
     "test:ui": "node tests/crag-ui.test.mjs",
     "test:all": "bun test tests/decide.test.ts tests/pipeline.test.ts && node tests/crag-ui.test.mjs",
-    "ingest": "bun run src/ingest/load.ts",
+    "ingest": "bun run src/ingest.ts",
     "embed-server": "embed-server/.venv/bin/python embed-server/server.py"
   },
   "dependencies": {

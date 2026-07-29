@@ -72,24 +72,25 @@ Weak evidence after max **2** correction attempts → **`refused`** (no degraded
 
 ```text
 src/
-  index.ts          Hono entry
-  llm.ts            MiMo chat
-  embed.ts          local Qwen3 HTTP client
-  retrieve.ts       LanceDB top-k=6
-  decide.ts         grade aggregate → strong|weak
-  api/query.ts
-  graph/            LangGraph Phase 1 pipeline
-  ingest/load.ts
-embed-server/       local embedding HTTP server
+  index.ts       Hono entry + /api/query
+  pipeline.ts    whole CRAG run (start here)
+  llm.ts         MiMo chat
+  embed.ts       local Qwen3 HTTP client
+  retrieve.ts    LanceDB top-k=6
+  decide.ts      grades → strong|weak
+  ingest.ts      JSONL → vectors → LanceDB
+embed-server/    local embedding HTTP server
 data/crag_corpus.jsonl
 crag.html
 tests/
 ```
 
+Code style: plain functions, no factories/DI (see `AGENTS.md`).
+
 ## Tests
 
 ```bash
-bun test tests/decide.test.ts tests/pipeline.test.ts   # graph unit tests (mocked ports)
+bun test tests/decide.test.ts tests/pipeline.test.ts   # pure helpers
 node tests/crag-ui.test.mjs                            # UI static + smoke (mock mode)
 ```
 

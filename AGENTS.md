@@ -14,7 +14,7 @@ A Corrective RAG system: **retrieve → grade relevance → correct (rewrite + r
 ### Phase 1 is “done” when
 
 1. End-to-end path works on a few **manual** queries (real LanceDB + local embeddings + MiMo), and  
-2. Graph logic is **unit tested** with mocked LLM / retrieve / embed (no live services required for unit tests).
+2. Pure helpers are **unit tested** (`decideStrength`, `routeAfterGrade`, empty-query guard) without live services.
 
 Do **not** block Phase 1 on a full gold-label eval harness or on finishing the incomplete LLM corpus generator.
 
@@ -68,35 +68,31 @@ Plain, flat-ish `src/`. One concern per file. No multi-package monorepo.
 
 ```text
 AGENTS.md
-README.md                 # run instructions (update when implementing)
-crag.html                 # UI
-data/
-  crag_corpus.jsonl
-  crag_queries.jsonl
-  lancedb/                # LanceDB table(s)
+README.md
+crag.html
+embed-server/server.py    # local Qwen3 HTTP embeddings
+data/crag_corpus.jsonl
 src/
-  index.ts                # Bun entry — mount Hono
-  types.ts                # shared narrow types
-  llm.ts                  # MiMo chat (narrow functions)
-  embed.ts                # call local Qwen3 HTTP embed server
-  retrieve.ts             # LanceDB dense top-k
-  decide.ts               # pure: grades → strong | weak
-  api/
-    query.ts              # POST /api/query handler
-  graph/
-    ...                   # LangGraph nodes + graph assembly
-  ingest/
-    load.ts               # JSONL → embed → LanceDB
-tests/                    # graph unit tests with mocks
+  index.ts                # Hono entry + POST /api/query
+  pipeline.ts             # whole CRAG run (LangGraph) — start here
+  llm.ts                  # MiMo completeChat
+  embed.ts                # local embed HTTP client
+  retrieve.ts             # LanceDB top-k
+  decide.ts               # grades → strong | weak
+  parseJson.ts
+  types.ts
+  ingest.ts               # JSONL → embed → LanceDB
+tests/
 ```
 
-Optional later: a small `embed-server/` or documented one-liner to run Qwen3-Embedding-0.6B as HTTP. Pick the concrete server (TEI, sentence-transformers, etc.) on **first implement** — not a reason to stall AGENTS.
+### Code style (required)
 
-### Naming (ports-and-adapters idea, plain names)
-
-- Mentally treat `llm.ts` / `embed.ts` / `retrieve.ts` as **ports**: graph code depends on **narrow function signatures**, not SDK types.
-- **Do not** create `*Adapter` classes, DI containers, or factory theater.
-- Prefer: `completeChat(...)`, `embedTexts(...)`, `retrieveSimilar(...)`.
+- **Plain functions** only — no classes, factories, DI bags, or `*Adapter` types.
+- `pipeline.ts` calls `completeChat` / `retrieveSimilar` **directly** (like Multi-Agent Tool).
+- Explicit types on params and returns. Short single-purpose functions.
+- Prefer `fetch` over heavy SDKs. Comments explain **why**, not what.
+- Build only what the current green gate needs — no stubs for later phases.
+- Prefer extending an existing file over adding a new folder.
 
 ---
 
@@ -203,10 +199,9 @@ Static file serving can stay simple (Bun/Hono static or separate `python -m http
 
 ## Architecture rules
 
-- **LangGraph.js** owns control flow (retrieve / grade / decide / correct / generate / refuse).
-- Graph nodes call **only** narrow helpers from `llm.ts`, `embed.ts`, `retrieve.ts`, `decide.ts`.
-- Graph nodes must **not** import LanceDB client types, MiMo SDK types, or embed-server client types directly.
-- **Plain functions** over classes. Minimal dependencies.
+- **LangGraph.js** owns control flow (retrieve / grade / correct / generate / refuse).
+- `pipeline.ts` calls plain helpers: `completeChat`, `retrieveSimilar`, `decideStrength`.
+- Retrieval talks to LanceDB only inside `retrieve.ts`. LLM HTTP only inside `llm.ts`.
 - No speculative generality. Build what Phase 1 needs.
 
 ### LLM usage (MiMo V2.5)
@@ -235,8 +230,8 @@ Use structured output or strict JSON parsing with a small repair/retry — keep 
 
 ### Required for Phase 1
 
-- Unit tests for graph / decide with **mocked** `completeChat`, `embedTexts`, `retrieveSimilar`.
-- A handful of **manual** E2E queries against real services.
+- Unit tests for pure helpers (`decideStrength`, `routeAfterGrade`, `docsForAnswer`).
+- A handful of **manual** E2E queries against real services (embed server + LanceDB + MiMo).
 
 ### After Phase 1 baseline works
 

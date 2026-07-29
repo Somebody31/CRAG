@@ -1,21 +1,37 @@
-// Load data/crag_corpus.jsonl → embed with local Qwen3 → LanceDB table `documents`.
+// Load data/crag_corpus.jsonl → embed → LanceDB table `documents`.
+// Run: bun run ingest
 
 import { readFileSync } from "node:fs";
 import * as lancedb from "@lancedb/lancedb";
-import { embedTexts } from "../embed.ts";
-import type { CorpusDoc } from "../types.ts";
+import { embedTexts } from "./embed.ts";
 
 const CORPUS_PATH = process.env.CORPUS_PATH || "data/crag_corpus.jsonl";
 const DB_PATH = process.env.LANCEDB_PATH || "data/lancedb";
 const TABLE = "documents";
 const BATCH = Number(process.env.EMBED_BATCH || 8);
 
-function readCorpus(path: string): CorpusDoc[] {
+type CorpusRow = {
+  id: string;
+  cluster_id: string | null;
+  role: string;
+  title: string;
+  content: string;
+  date: string;
+  validation_note: string | null;
+  contradiction_id: string | null;
+  version_chain_id: string | null;
+  version_number: number | null;
+  fragment_group_id: string | null;
+};
+
+function readCorpus(path: string): CorpusRow[] {
   const raw = readFileSync(path, "utf8");
-  const docs: CorpusDoc[] = [];
+  const docs: CorpusRow[] = [];
+
   for (const line of raw.split("\n")) {
     const trimmed = line.trim();
     if (!trimmed) continue;
+
     const d = JSON.parse(trimmed) as Record<string, unknown>;
     docs.push({
       id: String(d.id),
@@ -39,32 +55,35 @@ function readCorpus(path: string): CorpusDoc[] {
   return docs;
 }
 
-function embedInput(doc: CorpusDoc): string {
-  return `${doc.title}\n\n${doc.content}`;
+function textToEmbed(doc: CorpusRow): string {
+  return doc.title + "\n\n" + doc.content;
 }
 
 async function main() {
-  console.log(`Reading ${CORPUS_PATH}`);
+  console.log("Reading " + CORPUS_PATH);
   const docs = readCorpus(CORPUS_PATH);
-  console.log(`Loaded ${docs.length} documents`);
-
+  console.log("Loaded " + docs.length + " documents");
   if (docs.length === 0) {
     throw new Error("Corpus is empty");
   }
 
   console.log("Probing embed server…");
-  const [probe] = await embedTexts([embedInput(docs[0])]);
-  const dim = probe.length;
-  console.log(`Embedding dim=${dim}`);
+  const probe = await embedTexts([textToEmbed(docs[0])]);
+  const dim = probe[0].length;
+  console.log("Embedding dim=" + dim);
 
   const rows: Record<string, unknown>[] = [];
 
   for (let i = 0; i < docs.length; i += BATCH) {
     const batch = docs.slice(i, i + BATCH);
-    const texts = batch.map(embedInput);
-    console.log(
-      `Embedding ${i + 1}–${Math.min(i + BATCH, docs.length)} / ${docs.length}`,
-    );
+    const texts: string[] = [];
+    for (const d of batch) {
+      texts.push(textToEmbed(d));
+    }
+
+    const end = Math.min(i + BATCH, docs.length);
+    console.log("Embedding " + (i + 1) + "–" + end + " / " + docs.length);
+
     const vectors = await embedTexts(texts);
     for (let j = 0; j < batch.length; j++) {
       const d = batch[j];
@@ -85,20 +104,22 @@ async function main() {
     }
   }
 
-  console.log(`Writing LanceDB ${DB_PATH} table=${TABLE}`);
+  console.log("Writing LanceDB " + DB_PATH + " table=" + TABLE);
   const db = await lancedb.connect(DB_PATH);
   try {
     await db.dropTable(TABLE);
-    console.log(`Dropped existing table ${TABLE}`);
+    console.log("Dropped existing table " + TABLE);
   } catch {
-    // table may not exist
+    // First run — table does not exist yet.
   }
 
   await db.createTable(TABLE, rows);
   const table = await db.openTable(TABLE);
   const count = await table.countRows();
-  console.log(`Done. rows=${count} dim=${dim}`);
-  console.log(`Sample: ${rows[0].id} | ${String(rows[0].title).slice(0, 70)}`);
+  console.log("Done. rows=" + count + " dim=" + dim);
+  console.log(
+    "Sample: " + rows[0].id + " | " + String(rows[0].title).slice(0, 70),
+  );
 }
 
 main().catch((err) => {

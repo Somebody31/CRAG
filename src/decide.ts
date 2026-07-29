@@ -1,22 +1,21 @@
-// Pure decide step: grades → strong | weak. No I/O.
+// Pure decide step: list of grades → strong | weak.
 
 import type { GradeLabel } from "./types.ts";
 
 export type Strength = "strong" | "weak";
 
 /**
- * Phase 1 rule (AGENTS.md):
- * Strong if (relevant >= 1 && irrelevant === 0) OR relevant >= 2.
- * Weak otherwise (including empty list).
+ * Strong if (at least one relevant and no irrelevant)
+ * or at least two relevant. Empty list is weak.
  */
 export function decideStrength(grades: GradeLabel[]): Strength {
   if (grades.length === 0) return "weak";
 
   let relevant = 0;
   let irrelevant = 0;
-  for (const g of grades) {
-    if (g === "relevant") relevant += 1;
-    else if (g === "irrelevant") irrelevant += 1;
+  for (const grade of grades) {
+    if (grade === "relevant") relevant += 1;
+    if (grade === "irrelevant") irrelevant += 1;
   }
 
   if (relevant >= 1 && irrelevant === 0) return "strong";
