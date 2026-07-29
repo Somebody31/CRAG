@@ -1,105 +1,110 @@
-# CRAG — Corrective RAG (Phase 1)
+# CRAG
 
-Retrieve → grade → correct (rewrite + re-retrieve) → generate **or refuse**.
+Corrective retrieval-augmented generation: retrieve documents, grade relevance, rewrite and re-retrieve when evidence is weak, then answer — or refuse when the knowledge base cannot support a confident response.
 
-Stack (locked): **Bun · Hono · LangGraph.js · DeepSeek V4 Flash · LanceDB · Qwen3-Embedding-0.6B**.
+**Stack:** Bun · Hono · LangGraph.js · DeepSeek V4 Flash · LanceDB · Qwen3-Embedding-0.6B  
+**UI:** `crag.html` (served by the same process as the API)  
+**Start here:** [`src/pipeline.ts`](src/pipeline.ts) · Agent rules: [`AGENTS.md`](AGENTS.md)
 
-See [`AGENTS.md`](./AGENTS.md) for rules agents must follow.
+## How it works
 
-## Quick start
+```
+query → retrieve (k=6) → grade each doc → decide
+              ↑                              │
+              └── rewrite + re-retrieve ─────┤  (max 2 corrections)
+                                             ↓
+                                    strong → generate
+                                    weak   → refuse
+```
 
-### 1. Dependencies
+| Stage | Behavior |
+|-------|----------|
+| Retrieve | Dense ANN over LanceDB (query embedded with Qwen3) |
+| Grade | DeepSeek labels each doc `relevant` / `ambiguous` / `irrelevant` |
+| Decide | Strong if ≥1 relevant and 0 irrelevant, or ≥2 relevant |
+| Correct | LLM rewrites the query; search LanceDB again (files only — no web) |
+| Generate / refuse | Answer from relevant + ambiguous sources, or refuse after 2 weak rounds |
+
+## Setup
 
 ```bash
 bun install
 
-# Embed server (Python + PyTorch / transformers)
+# Local embedding server (first run downloads ~0.6B model weights)
 python3 -m venv embed-server/.venv
 embed-server/.venv/bin/pip install -r embed-server/requirements.txt
+
+cp .env.example .env
+# set DEEPSEEK_API_KEY=
 ```
 
-### 2. Environment
+## Run
 
-Copy `.env.example` → `.env` and set `DEEPSEEK_API_KEY`.
-
-### 3. Embedding server
+Use three terminals (or background processes):
 
 ```bash
-# First run downloads Qwen/Qwen3-Embedding-0.6B (~1GB+)
-embed-server/.venv/bin/python embed-server/server.py
-# → http://127.0.0.1:8090/v1/embeddings
-```
+# 1) Embeddings — http://127.0.0.1:8090
+bun run embed-server
 
-### 4. Ingest corpus into LanceDB (with vectors)
-
-```bash
+# 2) Index the corpus (once, or after corpus changes)
 bun run ingest
-# reads data/crag_corpus.jsonl → data/lancedb table `documents`
-```
 
-### 5. API + UI
-
-```bash
+# 3) API + UI — http://127.0.0.1:5173
 bun run dev
-# UI   http://127.0.0.1:5173/crag.html
-# API  POST http://127.0.0.1:5173/api/query
-#      body: { "query": "How do I install the Pulse Web SDK?" }
 ```
 
-Demo mock UI (no backend): `http://127.0.0.1:5173/crag.html?mock=1`
+| URL | Purpose |
+|-----|---------|
+| http://127.0.0.1:5173/crag.html | Chat UI (live backend) |
+| http://127.0.0.1:5173/crag.html?mock=1 | UI-only demo (no backend) |
+| `GET /health` | Liveness |
 
 ## API
 
-`POST /api/query`
-
-```json
-{ "query": "What is the Growth plan REST rate limit?" }
+```bash
+curl -s http://127.0.0.1:5173/api/query \
+  -H 'content-type: application/json' \
+  -d '{"query":"How do I install the Pulse Web SDK?"}'
 ```
 
-Response concepts:
-
-| Field | Meaning |
-|-------|---------|
-| `status` | `answered` \| `refused` \| `error` |
-| `documents[]` | Retrieved docs with `grade` |
-| `rewrites` | Query rewrites from the correct path |
+| Field | Description |
+|-------|-------------|
+| `status` | `answered` · `refused` · `error` |
+| `documents` | Retrieved docs with relevance grades |
+| `rewrites` | Query rewrites from the correction path |
 | `answer` / `refusal` | Final text |
-| `stages` | Trace of retrieve / grade / correct / generate / refuse |
+| `stages` | Pipeline trace |
 
-Weak evidence after max **2** correction attempts → **`refused`** (no degraded answer).
+Refused answers use HTTP 200 with `status: "refused"`. Hard failures return 500.
 
-## Layout
+## Project layout
 
 ```text
 src/
-  index.ts       Hono entry + /api/query
-  pipeline.ts    whole CRAG run (start here)
-  llm.ts         DeepSeek chat
-  embed.ts       local Qwen3 HTTP client
-  retrieve.ts    LanceDB top-k=6
-  decide.ts      grades → strong|weak
-  ingest.ts      JSONL → vectors → LanceDB
-embed-server/    local embedding HTTP server
-data/crag_corpus.jsonl
-crag.html
+  pipeline.ts    CRAG graph (entry for the run)
+  index.ts       HTTP server
+  llm.ts         DeepSeek
+  embed.ts       Local embedding client
+  retrieve.ts    LanceDB search
+  decide.ts      Strong / weak aggregation
+  ingest.ts      Corpus → vectors → LanceDB
+embed-server/    Qwen3-Embedding-0.6B HTTP service
+data/            Northline Pulse corpus (JSONL)
+crag.html        UI
 tests/
 ```
-
-Code style: plain functions, no factories/DI (see `AGENTS.md`).
 
 ## Tests
 
 ```bash
-bun test tests/decide.test.ts tests/pipeline.test.ts   # pure helpers
-node tests/crag-ui.test.mjs                            # UI static + smoke (mock mode)
+bun test          # decide + routing helpers
+bun run test:ui   # static UI contracts + browser smoke (mock mode)
 ```
 
-## Pipeline (Phase 1)
+## Data
 
-1. **Retrieve** — dense ANN, k=6  
-2. **Grade** — each doc `relevant` | `ambiguous` | `irrelevant` (DeepSeek)  
-3. **Decide** — strong if `(relevant≥1 ∧ irrelevant=0) ∨ relevant≥2`  
-4. **Correct** — rewrite → re-retrieve LanceDB only (no web)  
-5. **Generate** or **Refuse** after at most 2 corrections  
+The default corpus is a fictional B2B product knowledge base (**Northline Pulse**): ~400 documents and labeled query categories for later eval. Optional regeneration: `scripts/generate_crag_eval_llm.py` (DeepSeek).
 
-Phase 2 (agentic tool loop) is **out of scope** until Phase 1 is done and evaluated.
+## Scope
+
+Phase 1 is a local baseline pipeline. Agentic tool-calling, remote deploy, and a full eval harness are intentionally deferred — see [`AGENTS.md`](AGENTS.md).
